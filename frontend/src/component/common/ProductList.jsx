@@ -8,7 +8,10 @@ const ProductList = ({products}) => {
     const {cart, dispatch} = useCart();
 
     const addToCart = (product) => {
-        dispatch({type: 'ADD_ITEM', payload: product});
+        const confirmed = window.confirm("제품을 카트에 추가하시겠습니까?");
+        if (confirmed) {
+            dispatch({type: 'ADD_ITEM', payload: product});
+        }
     }
 
     const incrementItem = (product) => {
