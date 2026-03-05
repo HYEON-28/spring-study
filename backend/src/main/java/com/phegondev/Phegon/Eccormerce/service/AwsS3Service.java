@@ -20,7 +20,7 @@ import java.io.InputStream;
 @Slf4j
 public class AwsS3Service {
 
-    private final String bucketName = "phegon-ecommerce";
+    private final String bucketName = "ecommerce-test0303";
 
     @Value("${aws.s3.access}")
     private String awsS3AccessKey;
