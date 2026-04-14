@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import "../styles/Landing.css";
-import Nav from "../components/Nav";
 import { type Lang, I18N } from "../i18n";
+import Nav from "../components/Nav";
+import Footer from "../components/Footer";
 
 function Landing() {
   const [lang, setLang] = useState<Lang>("ko");
@@ -49,7 +50,6 @@ function Landing() {
 
   return (
     <>
-      <Nav t={t} />
       {/* LANG BAR */}
       <div className="lang-bar">
         <span className="lang-bar-label">
@@ -71,6 +71,7 @@ function Landing() {
           </button>
         ))}
       </div>
+      <Nav t={t} />
       {/* HERO */}
       <section className="hero">
         <div className="hero-grid"></div>
@@ -216,26 +217,7 @@ function Landing() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer>
-        <p>
-          <span>{t.footer_copy}</span>
-          {" — "}
-          <a
-            href="#"
-            style={{ color: "var(--gh-accent)", textDecoration: "none" }}
-          >
-            {t.footer_privacy}
-          </a>
-          {" · "}
-          <a
-            href="#"
-            style={{ color: "var(--gh-accent)", textDecoration: "none" }}
-          >
-            {t.footer_terms}
-          </a>
-        </p>
-      </footer>
+      <Footer t={t}></Footer>
     </>
   );
 }

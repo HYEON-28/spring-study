@@ -1,0 +1,75 @@
+nav {
+  position: fixed;
+  top: 38px;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(13, 17, 23, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gh-border);
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--gh-text);
+  text-decoration: none;
+}
+.navLogo svg {
+  width: 28px;
+  height: 28px;
+  fill: var(--gh-text);
+  flex-shrink: 0;
+}
+.navLogoAccent {
+  color: var(--gh-accent);
+}
+.navActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btnGhost {
+  background: transparent;
+  border-color: var(--gh-border);
+  color: var(--gh-text);
+}
+.btnGhost:hover {
+  background: var(--gh-surface2);
+  border-color: var(--gh-muted);
+}
+.btnGreen {
+  background: var(--gh-green);
+  border-color: rgba(240, 246, 252, 0.1);
+  color: #fff;
+}
+.btnGreen:hover {
+  background: var(--gh-green-light);
+}
+
+@media (max-width: 768px) {
+  .navLogo .wordmark {
+    display: none;
+  }
+}

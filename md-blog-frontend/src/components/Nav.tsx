@@ -1,3 +1,5 @@
+import styles from "./Nav.module.css";
+
 interface NavProps {
   t: Record<string, string>;
 }
@@ -5,7 +7,7 @@ interface NavProps {
 function Nav({ t }: NavProps) {
   return (
     <nav>
-      <a href="#" className="nav-logo">
+      <a href="#" className={styles.navLogo}>
         <svg viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
           <path
             fillRule="evenodd"
@@ -14,14 +16,14 @@ function Nav({ t }: NavProps) {
           />
         </svg>
         <span className="wordmark">
-          Git<span className="nav-logo-accent">Blog</span>
+          Git<span className={styles.navLogoAccent}>Blog</span>
         </span>
       </a>
-      <div className="nav-actions">
-        <a href="#" className="btn btn-ghost">
+      <div className={styles.navActions}>
+        <a href="#" className={`${styles.btn} ${styles.btnGhost}`}>
           {t.nav_login}
         </a>
-        <a href="#" className="btn btn-green">
+        <a href="#" className={`${styles.btn} ${styles.btnGreen}`}>
           {t.nav_signup}
         </a>
       </div>
