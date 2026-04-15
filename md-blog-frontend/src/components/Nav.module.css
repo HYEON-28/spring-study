@@ -1,6 +1,6 @@
 nav {
   position: fixed;
-  top: 38px;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 100;
@@ -66,6 +66,74 @@ nav {
 }
 .btnGreen:hover {
   background: var(--gh-green-light);
+}
+
+.langDropdown {
+  position: relative;
+}
+.langTrigger {
+  font-family: var(--font);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 12px;
+  background: transparent;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  color: var(--gh-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.langTrigger:hover {
+  background: var(--gh-surface2);
+  border-color: var(--gh-muted);
+}
+.langIcon {
+  width: 14px;
+  height: 14px;
+  fill: var(--gh-muted);
+  flex-shrink: 0;
+}
+.chevron {
+  width: 12px;
+  height: 12px;
+  color: var(--gh-muted);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.chevronOpen {
+  transform: rotate(180deg);
+}
+.langMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--gh-surface);
+  border: 1px solid var(--gh-border);
+  border-radius: 8px;
+  padding: 4px;
+  list-style: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 200;
+}
+.langItem {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--gh-text);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.langItem:hover {
+  background: var(--gh-surface2);
+}
+.langItemActive {
+  background: var(--gh-surface2);
+  color: var(--gh-accent);
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

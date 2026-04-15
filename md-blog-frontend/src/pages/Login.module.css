@@ -1,0 +1,149 @@
+.loginMain {
+  position: relative;
+  min-height: calc(100vh - 60px);
+  padding: 160px 24px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.loginGrid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(88, 166, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88, 166, 255, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 75%);
+  pointer-events: none;
+}
+
+.loginGlow {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle,
+    rgba(35, 134, 54, 0.15) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.loginCard {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: var(--gh-surface);
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 40px 36px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 24px 48px rgba(0, 0, 0, 0.4);
+  text-align: center;
+}
+
+.loginBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  background: var(--gh-surface2);
+  border: 1px solid var(--gh-border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--gh-muted);
+  margin-bottom: 24px;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gh-green-light);
+  box-shadow: 0 0 8px var(--gh-green-light);
+}
+
+.loginTitle {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gh-text);
+  margin-bottom: 16px;
+}
+
+.highlight {
+  background: linear-gradient(
+    90deg,
+    var(--gh-accent),
+    var(--gh-green-light)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.loginDesc {
+  font-size: 14px;
+  color: var(--gh-muted);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+.btnGithub {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background: var(--gh-green);
+  border: 1px solid rgba(240, 246, 252, 0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnGithub:hover {
+  background: var(--gh-green-light);
+  transform: translateY(-1px);
+}
+
+.btnGithub svg {
+  flex-shrink: 0;
+}
+
+.loginNote {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--gh-muted);
+  line-height: 1.6;
+}
+
+.loginLink {
+  color: var(--gh-accent);
+  text-decoration: none;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .loginCard {
+    padding: 32px 24px;
+  }
+  .loginTitle {
+    font-size: 24px;
+  }
+}

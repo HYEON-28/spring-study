@@ -1,27 +1,30 @@
+import type { Lang } from "../i18n";
+import { FOOTER_I18N } from "../i18n/footer";
 import styles from "./Footer.module.css";
 
 interface FooterProps {
-  t: Record<string, string>;
+  lang: Lang;
 }
 
-function Footer({ t }: FooterProps) {
+function Footer({ lang }: FooterProps) {
+  const t = FOOTER_I18N[lang];
   return (
     <footer className={styles.footer}>
       <p>
-        <span>{t.footer_copy}</span>
+        <span>{t.copy}</span>
         {" — "}
         <a
           href="#"
           style={{ color: "var(--gh-accent)", textDecoration: "none" }}
         >
-          {t.footer_privacy}
+          {t.privacy}
         </a>
         {" · "}
         <a
           href="#"
           style={{ color: "var(--gh-accent)", textDecoration: "none" }}
         >
-          {t.footer_terms}
+          {t.terms}
         </a>
       </p>
     </footer>

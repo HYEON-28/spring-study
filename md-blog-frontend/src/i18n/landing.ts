@@ -1,9 +1,7 @@
-export type Lang = "ko" | "en" | "ja" | "zh";
+import type { Lang } from ".";
 
-export const I18N: Record<Lang, Record<string, string>> = {
+export const LANDING_I18N: Record<Lang, Record<string, string>> = {
   ko: {
-    nav_login: "로그인",
-    nav_signup: "회원가입",
     hero_badge: "GitHub 레포를 블로그로 바꾸는 가장 쉬운 방법",
     hero_h1:
       'GitHub 레포를<br><span class="highlight">블로그처럼</span> 관리하세요',
@@ -44,13 +42,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     share_desc:
       "AI가 만든 요약본을 트위터에 바로 올리세요.<br>개발 일지를 꾸준히 공유하면 당신의 성장이 보입니다.",
     share_btn: "트위터로 공유하기",
-    footer_copy: "© 2025 GitBlog. GitHub 레포를 블로그처럼.",
-    footer_privacy: "개인정보처리방침",
-    footer_terms: "이용약관",
   },
   en: {
-    nav_login: "Sign in",
-    nav_signup: "Sign up",
     hero_badge: "The easiest way to turn your GitHub repo into a blog",
     hero_h1:
       'Manage your GitHub repo<br><span class="highlight">like a blog</span>',
@@ -91,13 +84,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     share_desc:
       "Post your AI-generated summary straight to Twitter.<br>Consistent sharing makes your growth visible.",
     share_btn: "Share on Twitter",
-    footer_copy: "© 2025 GitBlog. Your GitHub repo, like a blog.",
-    footer_privacy: "Privacy Policy",
-    footer_terms: "Terms of Service",
   },
   ja: {
-    nav_login: "ログイン",
-    nav_signup: "新規登録",
     hero_badge: "GitHubリポジトリをブログに変える最も簡単な方法",
     hero_h1:
       'GitHubリポジトリを<br><span class="highlight">ブログのように</span>管理しよう',
@@ -138,13 +126,8 @@ export const I18N: Record<Lang, Record<string, string>> = {
     share_desc:
       "AIが作成した要約をそのままTwitterに投稿しましょう。<br>継続的な発信があなたの成長を可視化します。",
     share_btn: "Twitterでシェアする",
-    footer_copy: "© 2025 GitBlog. GitHubリポジトリをブログのように。",
-    footer_privacy: "プライバシーポリシー",
-    footer_terms: "利用規約",
   },
   zh: {
-    nav_login: "登录",
-    nav_signup: "注册",
     hero_badge: "将 GitHub 仓库变成博客的最简单方式",
     hero_h1: '像博客一样管理你的<br><span class="highlight">GitHub 仓库</span>',
     hero_desc:
@@ -182,8 +165,5 @@ export const I18N: Record<Lang, Record<string, string>> = {
     share_desc:
       "将 AI 生成的摘要直接发布到 Twitter。<br>持续分享开发日志，让你的成长清晰可见。",
     share_btn: "分享到 Twitter",
-    footer_copy: "© 2025 GitBlog. 像博客一样管理 GitHub 仓库。",
-    footer_privacy: "隐私政策",
-    footer_terms: "服务条款",
   },
 };
