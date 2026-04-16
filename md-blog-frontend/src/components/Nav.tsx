@@ -1,13 +1,11 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
-import type { Lang } from "../i18n";
+import { Link, useNavigate } from "react-router-dom";
 import { NAV_I18N } from "../i18n/nav";
+import { useLang } from "../context/LangContext";
+import { useAuth } from "../context/AuthContext";
 import styles from "./Nav.module.css";
 
-interface NavProps {
-  lang: Lang;
-  onLangChange: (lang: Lang) => void;
-}
+type Lang = "ko" | "en" | "ja" | "zh";
 
 const LANG_OPTIONS: { value: Lang; label: string }[] = [
   { value: "ko", label: "🇰🇷 한국어" },
@@ -16,17 +14,17 @@ const LANG_OPTIONS: { value: Lang; label: string }[] = [
   { value: "zh", label: "🇨🇳 中文" },
 ];
 
-function Nav({ lang, onLangChange }: NavProps) {
+function Nav() {
+  const { lang, setLang } = useLang();
+  const { isLoggedIn, user, logout } = useAuth();
+  const navigate = useNavigate();
   const t = NAV_I18N[lang];
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     };
@@ -82,7 +80,7 @@ function Nav({ lang, onLangChange }: NavProps) {
                   aria-selected={lang === o.value}
                   className={`${styles.langItem}${lang === o.value ? " " + styles.langItemActive : ""}`}
                   onClick={() => {
-                    onLangChange(o.value);
+                    setLang(o.value);
                     setOpen(false);
                   }}
                 >
@@ -92,15 +90,33 @@ function Nav({ lang, onLangChange }: NavProps) {
             </ul>
           )}
         </div>
-        <Link to="/login" className={`${styles.btn} ${styles.btnGhost}`}>
-          {t.login}
-        </Link>
-        <Link
-          to="/login?mode=signup"
-          className={`${styles.btn} ${styles.btnGreen}`}
-        >
-          {t.signup}
-        </Link>
+        {isLoggedIn ? (
+          <>
+            {user?.avatarUrl && (
+              <img
+                src={user.avatarUrl}
+                alt={user.githubUsername}
+                style={{ width: 32, height: 32, borderRadius: "50%" }}
+              />
+            )}
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnGhost}`}
+              onClick={() => { logout(); navigate("/"); }}
+            >
+              {t.logout}
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className={`${styles.btn} ${styles.btnGhost}`}>
+              {t.login}
+            </Link>
+            <Link to="/login?mode=signup" className={`${styles.btn} ${styles.btnGreen}`}>
+              {t.signup}
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );

@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { Lang } from "../i18n";
+
+interface LangContextValue {
+  lang: Lang;
+  setLang: (lang: Lang) => void;
+}
 
 const STORAGE_KEY = "md-blog.lang";
 const DEFAULT_LANG: Lang = "ko";
@@ -7,13 +12,13 @@ const VALID_LANGS: Lang[] = ["ko", "en", "ja", "zh"];
 
 function readStoredLang(): Lang {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored && VALID_LANGS.includes(stored as Lang)) {
-    return stored as Lang;
-  }
+  if (stored && VALID_LANGS.includes(stored as Lang)) return stored as Lang;
   return DEFAULT_LANG;
 }
 
-export function useLang(): [Lang, (lang: Lang) => void] {
+const LangContext = createContext<LangContextValue | null>(null);
+
+export function LangProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>(readStoredLang);
 
   useEffect(() => {
@@ -32,5 +37,15 @@ export function useLang(): [Lang, (lang: Lang) => void] {
     setLangState(next);
   };
 
-  return [lang, setLang];
+  return (
+    <LangContext.Provider value={{ lang, setLang }}>
+      {children}
+    </LangContext.Provider>
+  );
+}
+
+export function useLang() {
+  const ctx = useContext(LangContext);
+  if (!ctx) throw new Error("useLang must be used within LangProvider");
+  return ctx;
 }

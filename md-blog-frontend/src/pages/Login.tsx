@@ -1,19 +1,19 @@
 import { useSearchParams } from "react-router-dom";
 import { LOGIN_I18N } from "../i18n/login";
-import { useLang } from "../hooks/useLang";
+import { useLang } from "../context/LangContext";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import styles from "./Login.module.css";
 
 function Login() {
-  const [lang, setLang] = useLang();
+  const { lang } = useLang();
   const [searchParams] = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
   const t = LOGIN_I18N[lang];
 
   return (
     <>
-      <Nav lang={lang} onLangChange={setLang} />
+      <Nav />
       <main className={styles.loginMain}>
         <div className={styles.loginGrid}></div>
         <div className={styles.loginGlow}></div>
@@ -30,7 +30,11 @@ function Login() {
             className={styles.loginDesc}
             dangerouslySetInnerHTML={{ __html: t.desc_html }}
           />
-          <button className={styles.btnGithub} type="button">
+          <button
+            className={styles.btnGithub}
+            type="button"
+            onClick={() => { window.location.href = "http://localhost:8080/oauth2/authorization/github"; }}
+          >
             <svg width="18" height="18" viewBox="0 0 98 96" fill="white">
               <path
                 fillRule="evenodd"
@@ -53,7 +57,7 @@ function Login() {
           </p>
         </div>
       </main>
-      <Footer lang={lang} />
+      <Footer />
     </>
   );
 }

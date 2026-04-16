@@ -1,21 +1,20 @@
 import { useEffect, useRef } from "react";
 import "../styles/Landing.css";
 import { LANDING_I18N } from "../i18n/landing";
-import { useLang } from "../hooks/useLang";
+import { useLang } from "../context/LangContext";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 
 function Landing() {
-  const [lang, setLang] = useLang();
+  const { lang } = useLang();
   const featuresRef = useRef<HTMLElement>(null);
   const t = LANDING_I18N[lang];
 
-  const handleLangChange = (newLang: typeof lang) => {
-    setLang(newLang);
+  useEffect(() => {
     document.body.classList.remove("lang-switch-fade");
     void document.body.offsetWidth;
     document.body.classList.add("lang-switch-fade");
-  };
+  }, [lang]);
 
   const handleFeaturesScroll = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -50,7 +49,7 @@ function Landing() {
 
   return (
     <>
-      <Nav lang={lang} onLangChange={handleLangChange} />
+      <Nav />
       {/* HERO */}
       <section className="hero">
         <div className="hero-grid"></div>
@@ -196,7 +195,7 @@ function Landing() {
         </div>
       </section>
 
-      <Footer lang={lang}></Footer>
+      <Footer />
     </>
   );
 }
