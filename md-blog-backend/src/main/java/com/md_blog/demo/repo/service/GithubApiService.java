@@ -1,11 +1,10 @@
 package com.md_blog.demo.repo.service;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.md_blog.demo.repo.dto.GithubRepoDto;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Set;
@@ -53,29 +52,32 @@ public class GithubApiService {
 
     /** 오늘 00:00 UTC 이후 커밋 목록 (최대 20개) */
     public List<CommitSummary> getTodayCommits(String accessToken, String fullName, String since) {
-        String uri = UriComponentsBuilder
-                .fromPath("/repos/{fullName}/commits")
-                .queryParam("since", since)
-                .queryParam("per_page", 20)
-                .buildAndExpand(fullName)
-                .toUriString();
-
-        List<CommitSummary> result = restClient.get()
-                .uri(uri)
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {});
-
-        return result != null ? result : List.of();
+        // fullName의 슬래시가 인코딩되지 않도록 문자열로 직접 조합
+        String uri = "/repos/" + fullName + "/commits?since=" + since + "&per_page=20";
+        try {
+            List<CommitSummary> result = restClient.get()
+                    .uri(uri)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+            return result != null ? result : List.of();
+        } catch (RestClientException e) {
+            return List.of();
+        }
     }
 
     /** 특정 커밋의 파일 변경 상세 */
     public CommitDetail getCommitDetail(String accessToken, String fullName, String sha) {
-        return restClient.get()
-                .uri("/repos/{fullName}/commits/{sha}", fullName, sha)
-                .header("Authorization", "Bearer " + accessToken)
-                .retrieve()
-                .body(CommitDetail.class);
+        String uri = "/repos/" + fullName + "/commits/" + sha;
+        try {
+            return restClient.get()
+                    .uri(uri)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .body(CommitDetail.class);
+        } catch (RestClientException e) {
+            return null;
+        }
     }
 
     // ── GitHub API 응답 모델 ──────────────────────────────────────────────────

@@ -38,7 +38,7 @@ function dotClass(type: FileType): string {
 }
 
 function Main() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
   const [repos, setRepos] = useState<ConnectedRepo[]>([]);
   const [reposLoading, setReposLoading] = useState(true);
@@ -80,9 +80,11 @@ function Main() {
       <Nav />
       <main className={styles.main}>
         <div className={styles.greeting}>
-          <div className={styles.greetingSub}>금요일, 2026년 4월 17일</div>
+          <div className={styles.greetingSub}>
+            {new Date().toLocaleDateString("ko-KR", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+          </div>
           <div className={styles.greetingTitle}>
-            안녕하세요, <span>kim-dev</span> 님
+            안녕하세요, <span>{user?.githubUsername}</span> 님
           </div>
         </div>
 
