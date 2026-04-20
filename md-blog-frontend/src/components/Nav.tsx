@@ -52,6 +52,13 @@ function Nav() {
         </span>
       </Link>
       <div className={styles.navActions}>
+        {isLoggedIn && user?.avatarUrl && (
+          <img
+            src={user.avatarUrl}
+            alt={user.githubUsername}
+            style={{ width: 32, height: 32, borderRadius: "50%" }}
+          />
+        )}
         <div className={styles.langDropdown} ref={dropdownRef}>
           <button
             type="button"
@@ -94,25 +101,16 @@ function Nav() {
           )}
         </div>
         {isLoggedIn ? (
-          <>
-            {user?.avatarUrl && (
-              <img
-                src={user.avatarUrl}
-                alt={user.githubUsername}
-                style={{ width: 32, height: 32, borderRadius: "50%" }}
-              />
-            )}
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnGhost}`}
-              onClick={() => {
-                logout();
-                navigate("/");
-              }}
-            >
-              {t.logout}
-            </button>
-          </>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnGhost}`}
+            onClick={() => {
+              logout();
+              navigate("/");
+            }}
+          >
+            {t.logout}
+          </button>
         ) : (
           <>
             <Link to="/login" className={`${styles.btn} ${styles.btnGhost}`}>

@@ -6,8 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClient;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -70,11 +68,14 @@ public class GithubApiService {
 
     /** 특정 파일을 건드린 오늘 커밋 목록 */
     public List<CommitSummary> getFileCommits(String accessToken, String fullName, String since, String filePath) {
-        String encodedPath = URLEncoder.encode(filePath, StandardCharsets.UTF_8);
-        String uri = "/repos/" + fullName + "/commits?since=" + since + "&path=" + encodedPath + "&per_page=20";
         try {
             List<CommitSummary> result = restClient.get()
-                    .uri(uri)
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/repos/" + fullName + "/commits")
+                            .queryParam("since", since)
+                            .queryParam("path", filePath)
+                            .queryParam("per_page", 20)
+                            .build())
                     .header("Authorization", "Bearer " + accessToken)
                     .retrieve()
                     .body(new ParameterizedTypeReference<>() {});

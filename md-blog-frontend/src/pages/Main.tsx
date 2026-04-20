@@ -117,9 +117,15 @@ function Main() {
           </div>
           <div className={styles.statCard}>
             <div className={styles.statLabel}>오늘 수정된 파일</div>
-            <div className={styles.statValue}>8</div>
+            <div className={styles.statValue}>
+              {updatesLoading
+                ? "-"
+                : todayUpdates.reduce((s, r) => s + r.files.length, 0)}
+            </div>
             <div className={styles.statSub} style={{ color: "#d29922" }}>
-              +243 / −57 lines
+              {updatesLoading
+                ? "-"
+                : `+${todayUpdates.reduce((s, r) => s + r.totalAdd, 0)} / −${todayUpdates.reduce((s, r) => s + r.totalDel, 0)} lines`}
             </div>
           </div>
         </div>
