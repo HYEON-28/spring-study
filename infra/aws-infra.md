@@ -397,67 +397,80 @@ GitHub Webhook → API Gateway → SQS → Fargate Worker
 - Route 53: md-blog.org 도메인 구매 또는 Hosted Zone 등록
   - hosted zone: 도메인 -> AWS 리소스로 라우팅
 
-1단계 — 네트워크 기반
+1.  ACM 인증서 발급 ⭐ 먼저 시작 - 리전: ALB와 같은 리전 (ap-northeast-2)
 
-1. VPC 10.0.0.0/16
-2. Subnet 6개: Public-a/b, Private-app-a/b, Private-data-a/b (2 AZ)
-3. Internet Gateway + NAT Gateway (Public-a에 1개면 충분, HA는 AZ별 2개)
-4. Route Table 3종: Public(→IGW), Private-app(→NAT), Private-data(로컬만)
-5. VPC Endpoint: S3 (Gateway형, 무료), ECR api/dkr + CloudWatch Logs + Secrets
-   Manager (Interface형, NAT 비용 절감)
+- 도메인: \*.md-blog.org + md-blog.org (와일드카드)
+- 검증 방식: DNS 검증 (Route 53 있으니 자동)
+- 발급에 몇 분~몇 시간 걸릴 수 있어 가장 먼저 요청
 
-2단계 — 보안
+2. Security Group 3개 생성
 
-6. Security Group 3종: ALB-SG, Fargate-SG, Data-SG (문서 규칙대로)
-7. Secrets Manager: DB_PASSWORD, JWT_SECRET, GITHUB_OAUTH_SECRET
-8. ACM: \*.md-blog.org 와일드카드 인증서 (DNS 검증) — Route 53 Hosted Zone 먼저 필요
+먼저 껍데기만 만들고 규칙은 나중에 채움 (상호 참조 때문):
 
-3단계 — 데이터 레이어
+- alb-sg
+- fargate-sg
+- rds-sg
 
-9. RDS MySQL Multi-AZ (Private-data 서브넷 그룹, Data-SG 연결)
-10. ElastiCache Redis (Private-data, Data-SG) — 지금 당장 안 써도 됩니다. 세션 캐시
-    도입 전까진 스킵 가능
-11. S3 버킷 2개: gitxpert-md-files(md 원본), md-blog-frontend(정적 호스팅)
+생성 후 규칙 추가:
+ALB SG ← 인터넷 443
+Fargate SG ← ALB SG (app port)
+RDS SG ← Fargate SG (3306)
 
-4단계 — 이미지 레지스트리
+3. RDS 생성 ⭐ 시간 오래 걸림 (10~20분)
 
-12. ECR 리포지토리 gitxpert-app
+- DB Subnet Group 먼저 생성 (private-data-a/b)
+- MySQL 8.x, Multi-AZ, rds-sg 연결
+- Secrets Manager에 비밀번호 저장 옵션 체크
+- 생성 버튼 누르고 다음 단계 진행
 
-5단계 — 로드밸런서
+4. ECR 레포지토리 생성
 
-13. ALB (Public 서브넷, ALB-SG, ACM 인증서 연결)
-14. Target Group (target type=ip, protocol HTTP, health check /actuator/health 또는
-    루트)
-15. Listener: 80→443 리다이렉트, 443→Target Group
-16. Route 53 ALIAS: \*.md-blog.org → ALB
+- 레포명: gitxpert-app
+- 이미지 스캔 활성화 권장
 
-6단계 — 실행 환경
+5. Docker 이미지 빌드 & Push
 
-17. CloudWatch Log Group /ecs/gitxpert-app
-18. ECS Cluster gitxpert-cluster
-19. IAM Role 2종: Task Execution Role(ECR pull·Secrets 읽기), Task Role(Route53·S3
-    접근)
-20. Task Definition: ECR 이미지, 512 CPU/1024 MB, 환경변수/시크릿, 로그 설정
-21. ECS Service: Fargate, Private-app 서브넷, Fargate-SG, Target Group 연결,
-    desired=2
+로컬에서 한 번 수동으로:
+aws ecr get-login-password | docker login --username AWS ...
+docker build -t gitxpert-app .
+docker tag gitxpert-app:latest {account}.dkr.ecr.../gitxpert-app:v1
+docker push ...
+→ ECS Task Definition에서 이 이미지를 참조해야 함
 
-7단계 — 배포 자동화
+6. ALB 생성
 
-22. GitHub Actions workflow (secrets에 OIDC role ARN 또는 access key 등록)
-23. 첫 push → ECR 푸시 → ECS 서비스 업데이트 확인
+- Target Group 먼저 생성 (target type: IP ← Fargate용 필수)
+- ALB 생성 시 public-a/b 선택, alb-sg 연결
+- Listener: 443 (ACM 인증서 연결) + 80 → 443 리다이렉트
 
-8단계 — 프론트엔드
+7. ECS Cluster + Task Definition + Service
 
-24. S3 버킷 정적 호스팅 활성화 + CloudFront 배포, app.md-blog.org로 Route 53 A
-    레코드
+- Cluster: gitxpert-cluster (Fargate 타입)
+- Task Definition: ECR 이미지, 환경변수(Secrets Manager 참조), 로그 그룹
+- Service: public 서브넷, assignPublicIp: ENABLED, Target Group 연결
 
-9단계 — 서브도메인 자동화 (블로그 기능 붙일 때)
+8. Route 53 A 레코드 (ALIAS)
 
-25. Lambda create-subdomain + IAM Role(Route53 change 권한), Fargate 앱에서 호출
+- \*.md-blog.org → ALB (ALIAS 타입)
+- TTL 자동 관리
 
----
+9. 동작 확인
 
-최소로 먼저 돌려보고 싶다면 1→2(SG/Secrets만)→3(RDS+S3)→4→5→6 순서면 백엔드가
-HTTPS로 동작합니다. Redis·Lambda·서브도메인 자동화는 기능 도입 시점까지 뒤로 미뤄도
-됩니다. 초기에는 NAT Gateway가 월 $32 정도로 가장 큰 고정비이니, 개발 단계에서는
-퍼블릭 서브넷에 Fargate를 두는 단순 구조로 시작해 비용을 아끼는 선택도 가능합니다.
+- curl https://test.md-blog.org → ALB → Fargate → RDS 응답 체크
+
+10. 이후 GitHub Actions CI/CD 연결
+
+단계별 병렬화 팁
+
+1 (ACM) ──┐
+2 (SG) ──┼── 동시에 걸어두고
+3 (RDS) ──┘ 생성 기다리는 동안
+4,5 (ECR + Docker push) 진행
+→ 다 끝나면 6,7,8 순차 진행
+
+지금 바로 할 것
+
+ACM 인증서 요청 + RDS 생성 시작. 둘 다 시간이 걸리므로 먼저 걸어두고, 기다리는
+동안 나머지 진행하면 전체 시간을 크게 줄일 수 있습니다.
+
+막히는 단계 있으면 해당 단계만 더 자세히 안내해드릴게요.
