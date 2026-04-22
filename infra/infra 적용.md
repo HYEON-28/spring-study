@@ -58,6 +58,8 @@ AWS 리소스 단위의 가상 방화벽
 
 ## DB 설정
 
+### Amaon RDS Single AZ 생성
+
 ### Single-AZ vs Multi-AZ
 
 RDS MySQL Single-AZ
@@ -75,3 +77,22 @@ RDS MySQL Multi-AZ
 
 RDS 인스턴스를 어느 AZ(가용영역)의 어떤 서브넷이 둘지 정의함 (RDS는 복수의 가용영역이 필요하기 때문)
 보통 Private Subnet만 포함함
+
+## ALB 설정
+
+- 인터넷에서 들어오는 요청을 서비스들에 분배함
+- health check: /health
+
+### Target Group 생성
+
+- Target Type: IP (Fargate용)
+- Port: 8080
+
+## ECR 설정
+
+- 주소: 955391928395.dkr.ecr.ap-northeast-2.amazonaws.com/md-blog-app
+
+## ECS 생성
+
+- intra: fargate 설정
+- task definition: 0.5 vCPU, 1 GM Memory
