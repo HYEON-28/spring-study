@@ -4,31 +4,22 @@ name: Deploy to ECR
 on:
   push:
     branches: [main]
-run: |
-  if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-    echo "SECRET IS EMPTY"                                      
-  else        
-    echo "SECRET EXISTS (length: ${#AWS_ACCESS_KEY_ID})"        
-  fi
-env:
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
 jobs:
   deploy:
-    runs-on: ubuntu-latestxw
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Check secrets exist
-          run: |                                                          
-            if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-              echo "SECRET IS EMPTY"                                      
-          else        
-            echo "SECRET EXISTS (length: ${#AWS_ACCESS_KEY_ID})"        
-          fi                                                            
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "SECRET IS EMPTY"
+          else
+            echo "SECRET EXISTS"
+          fi
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}           
-                  
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
