@@ -1,9 +1,18 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
+export interface BlogRepo {
+  githubRepoId: number;
+  name: string;
+  description: string | null;
+  language: string | null;
+  htmlUrl: string;
+}
+
 export interface BlogMain {
   username: string;
   name: string | null;
   avatarUrl: string | null;
+  repos: BlogRepo[];
 }
 
 export async function getBlogMain(username: string): Promise<BlogMain> {

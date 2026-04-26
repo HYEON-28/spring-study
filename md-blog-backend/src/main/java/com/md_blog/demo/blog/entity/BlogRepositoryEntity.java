@@ -57,4 +57,5 @@ public class BlogRepositoryEntity {
     public void deactivate() {
         this.active = false;
     }
+
 }

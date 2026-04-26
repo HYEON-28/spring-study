@@ -10,7 +10,9 @@ import {
   type TodayUpdateRepo,
 } from "../api/repoApi";
 import { useAuth } from "../context/AuthContext";
+import { useLang } from "../context/LangContext";
 import { toRelativeTime } from "../utils/time";
+import { MAIN_I18N } from "../i18n/main";
 
 const LANG_COLORS: Record<string, string> = {
   TypeScript: "#3178c6",
@@ -42,7 +44,9 @@ function dotClass(type: FileType): string {
 
 function Main() {
   const { token, user } = useAuth();
+  const { lang } = useLang();
   const navigate = useNavigate();
+  const t = MAIN_I18N[lang];
   const [repos, setRepos] = useState<ConnectedRepo[]>([]);
   const [reposLoading, setReposLoading] = useState(true);
   const [todayUpdates, setTodayUpdates] = useState<TodayUpdateRepo[]>([]);
@@ -84,7 +88,7 @@ function Main() {
       <main className={styles.main}>
         <div className={styles.greeting}>
           <div className={styles.greetingSub}>
-            {new Date().toLocaleDateString("ko-KR", {
+            {new Date().toLocaleDateString(t.dateLocale, {
               weekday: "long",
               year: "numeric",
               month: "long",
@@ -92,31 +96,31 @@ function Main() {
             })}
           </div>
           <div className={styles.greetingTitle}>
-            안녕하세요, <span>{user?.githubUsername}</span> 님
+            {t.greeting_prefix}<span>{user?.githubUsername}</span>{t.greeting_suffix}
           </div>
         </div>
 
         <div className={styles.statRow}>
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>연동된 레포지토리</div>
+            <div className={styles.statLabel}>{t.stat_repos}</div>
             <div className={styles.statValue}>
               {reposLoading ? "-" : repos.length}
             </div>
             <div className={styles.statSub} style={{ color: "#3fb950" }}>
-              연동된 레포
+              {t.stat_repos_sub}
             </div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>블로그 연동 레포</div>
+            <div className={styles.statLabel}>{t.stat_blog_repos}</div>
             <div className={styles.statValue}>
               {reposLoading ? "-" : repos.filter((r) => r.blog).length}
             </div>
             <div className={styles.statSub} style={{ color: "#a371f7" }}>
-              블로그 레포
+              {t.stat_blog_repos_sub}
             </div>
           </div>
           <div className={styles.statCard}>
-            <div className={styles.statLabel}>오늘 수정된 파일</div>
+            <div className={styles.statLabel}>{t.stat_files}</div>
             <div className={styles.statValue}>
               {updatesLoading
                 ? "-"
@@ -130,7 +134,7 @@ function Main() {
           </div>
         </div>
 
-        {/* SECTION 1: 레포지토리 관리 */}
+        {/* SECTION 1 */}
         <div className={styles.section}>
           <div
             className={styles.sectionHeader}
@@ -142,7 +146,7 @@ function Main() {
                   <path d="M2 2.5A2.5 2.5 0 014.5 0h8.75a.75.75 0 01.75.75v12.5a.75.75 0 01-.75.75h-2.5a.75.75 0 010-1.5h1.75v-2h-8a1 1 0 00-.714 1.7.75.75 0 01-1.072 1.05A2.495 2.495 0 012 11.5v-9zm10.5-1V9h-8c-.356 0-.694.074-1 .208V2.5a1 1 0 011-1h8z" />
                 </svg>
               </div>
-              <span className={styles.sectionTitle}>레포지토리 관리</span>
+              <span className={styles.sectionTitle}>{t.section_repo}</span>
               <span className={styles.sectionCount}>{repos.length}</span>
             </div>
             <div className={styles.sectionHeaderRight}>
@@ -161,7 +165,7 @@ function Main() {
                 >
                   <path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.103-.303c-.066-.019-.176-.011-.299.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.644-.716 1.195-1.459 1.258a8.233 8.233 0 0 1-1.402 0c-.743-.063-1.289-.614-1.459-1.258l-.288-1.107c-.018-.066-.079-.158-.212-.224a5.898 5.898 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.103.303c.066.019.176.011.299-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.288-1.107C5.49.645 6.035.095 6.779.031 7.01.01 7.505 0 8 0Zm-.571 6.603a2 2 0 1 0 1.142 3.847 2 2 0 0 0-1.142-3.847Z" />
                 </svg>
-                레포 설정
+                {t.btn_repo_settings}
               </button>
               <svg
                 className={cx(styles.chevron, !collapsed.repo && styles.open)}
@@ -182,11 +186,9 @@ function Main() {
           >
             <div>
               {reposLoading ? (
-                <div className={styles.loadingText}>불러오는 중...</div>
+                <div className={styles.loadingText}>{t.loading}</div>
               ) : repos.length === 0 ? (
-                <div className={styles.emptyText}>
-                  연동된 레포지토리가 없습니다.
-                </div>
+                <div className={styles.emptyText}>{t.empty_repos}</div>
               ) : (
                 repos.map((r) => {
                   const langColor = LANG_COLORS[r.language ?? ""] ?? "#8b949e";
@@ -209,10 +211,10 @@ function Main() {
                           </span>
                         )}
                         <span className={cx(styles.tag, styles.tagActive)}>
-                          연동됨
+                          {t.tag_connected}
                         </span>
                         <span className={styles.repoUpdated}>
-                          {toRelativeTime(r.pushedAt)}
+                          {toRelativeTime(r.pushedAt, lang)}
                         </span>
                       </div>
                     </div>
@@ -223,7 +225,7 @@ function Main() {
           </div>
         </div>
 
-        {/* SECTION 2: 블로그 관리 */}
+        {/* SECTION 2 */}
         <div className={styles.section}>
           <div
             className={styles.sectionHeader}
@@ -235,9 +237,9 @@ function Main() {
                   <path d="M0 1.75A.75.75 0 01.75 1h4.253c1.227 0 2.317.59 3 1.501A3.744 3.744 0 0111.006 1h4.245a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-4.507a2.25 2.25 0 00-1.591.659l-.622.621a.75.75 0 01-1.06 0l-.622-.621A2.25 2.25 0 005.258 13H.75a.75.75 0 01-.75-.75zm7.251 10.324l.004-5.073-.002-2.253A2.25 2.25 0 005.003 2.5H1.5v9h3.757a3.75 3.75 0 012 .756zM8.755 4.75l-.004 7.322a3.752 3.752 0 012-.572H14.5v-9h-3.495a2.25 2.25 0 00-2.25 2.25z" />
                 </svg>
               </div>
-              <span className={styles.sectionTitle}>블로그 관리</span>
+              <span className={styles.sectionTitle}>{t.section_blog}</span>
               <span className={styles.sectionCount}>
-                {repos.filter((r) => r.blog).length}개 레포
+                {repos.filter((r) => r.blog).length}{t.unit_blog_repos}
               </span>
             </div>
             <div className={styles.sectionHeaderRight}>
@@ -256,7 +258,7 @@ function Main() {
                 >
                   <path d="M8 0a8.2 8.2 0 0 1 .701.031C9.444.095 9.99.645 10.16 1.29l.288 1.107c.018.066.079.158.212.224.231.114.454.243.668.386.123.082.233.09.299.071l1.103-.303c.644-.176 1.392.021 1.82.63.27.385.506.792.704 1.218.315.675.111 1.422-.364 1.891l-.814.806c-.049.048-.098.147-.088.294.016.257.016.515 0 .772-.01.147.038.246.088.294l.814.806c.475.469.679 1.216.364 1.891a7.977 7.977 0 0 1-.704 1.217c-.428.61-1.176.807-1.82.63l-1.103-.303c-.066-.019-.176-.011-.299.071a5.909 5.909 0 0 1-.668.386c-.133.066-.194.158-.212.224l-.288 1.107c-.17.644-.716 1.195-1.459 1.258a8.233 8.233 0 0 1-1.402 0c-.743-.063-1.289-.614-1.459-1.258l-.288-1.107c-.018-.066-.079-.158-.212-.224a5.898 5.898 0 0 1-.668-.386c-.123-.082-.233-.09-.299-.071l-1.103.303c-.644.176-1.392-.021-1.82-.63a8.12 8.12 0 0 1-.704-1.218c-.315-.675-.111-1.422.363-1.891l.815-.806c.05-.048.098-.147.088-.294a6.214 6.214 0 0 1 0-.772c.01-.147-.038-.246-.088-.294l-.815-.806C.635 6.045.431 5.298.746 4.623a7.92 7.92 0 0 1 .704-1.217c.428-.61 1.176-.807 1.82-.63l1.103.303c.066.019.176.011.299-.071.214-.143.437-.272.668-.386.133-.066.194-.158.212-.224l.288-1.107C5.49.645 6.035.095 6.779.031 7.01.01 7.505 0 8 0Zm-.571 6.603a2 2 0 1 0 1.142 3.847 2 2 0 0 0-1.142-3.847Z" />
                 </svg>
-                블로그 설정
+                {t.btn_blog_settings}
               </button>
               <svg
                 className={cx(styles.chevron, !collapsed.blog && styles.open)}
@@ -277,11 +279,9 @@ function Main() {
           >
             <div>
               {reposLoading ? (
-                <div className={styles.loadingText}>불러오는 중...</div>
+                <div className={styles.loadingText}>{t.loading}</div>
               ) : repos.filter((r) => r.blog).length === 0 ? (
-                <div className={styles.emptyText}>
-                  블로그로 연동된 레포지토리가 없습니다.
-                </div>
+                <div className={styles.emptyText}>{t.empty_blog_repos}</div>
               ) : (
                 repos
                   .filter((r) => r.blog)
@@ -319,7 +319,7 @@ function Main() {
                             </span>
                           )}
                           <span className={styles.repoUpdated}>
-                            {toRelativeTime(br.pushedAt)}
+                            {toRelativeTime(br.pushedAt, lang)}
                           </span>
                         </div>
                       </div>
@@ -330,7 +330,7 @@ function Main() {
           </div>
         </div>
 
-        {/* SECTION 3: 오늘의 업데이트 */}
+        {/* SECTION 3 */}
         <div className={styles.section}>
           <div
             className={styles.sectionHeader}
@@ -342,11 +342,11 @@ function Main() {
                   <path d="M1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0zM8 0a8 8 0 100 16A8 8 0 008 0zm.75 4.75a.75.75 0 00-1.5 0v3.5a.75.75 0 00.22.53l2.25 2.25a.75.75 0 101.06-1.06L8.75 7.94V4.75z" />
                 </svg>
               </div>
-              <span className={styles.sectionTitle}>오늘의 업데이트</span>
+              <span className={styles.sectionTitle}>{t.section_update}</span>
               <span className={styles.sectionCount}>
                 {updatesLoading
                   ? "..."
-                  : `레포 ${todayUpdates.length} · 파일 ${todayUpdates.reduce((s, r) => s + r.files.length, 0)}`}
+                  : `${t.unit_repo} ${todayUpdates.length} · ${t.unit_file} ${todayUpdates.reduce((s, r) => s + r.files.length, 0)}`}
               </span>
             </div>
             <div className={styles.sectionHeaderRight}>
@@ -369,11 +369,9 @@ function Main() {
           >
             <div>
               {updatesLoading ? (
-                <div className={styles.loadingText}>불러오는 중...</div>
+                <div className={styles.loadingText}>{t.loading}</div>
               ) : todayUpdates.length === 0 ? (
-                <div className={styles.emptyText}>
-                  오늘 업데이트된 레포지토리가 없습니다.
-                </div>
+                <div className={styles.emptyText}>{t.empty_updates}</div>
               ) : (
                 todayUpdates.map((ur, i) => {
                   const langColor = LANG_COLORS[ur.language ?? ""] ?? "#8b949e";
@@ -402,7 +400,7 @@ function Main() {
                           <span className={styles.diffDel}>−{ur.totalDel}</span>
                         </div>
                         <span className={styles.updateFileCount}>
-                          {ur.files.length}개 파일
+                          {ur.files.length}{lang === "en" ? " files" : lang === "ja" ? "件のファイル" : lang === "zh" ? "个文件" : "개 파일"}
                         </span>
                         <svg
                           className={cx(

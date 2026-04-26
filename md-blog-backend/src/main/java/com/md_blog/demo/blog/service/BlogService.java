@@ -1,6 +1,7 @@
 package com.md_blog.demo.blog.service;
 
 import com.md_blog.demo.blog.dto.BlogMainResponse;
+import com.md_blog.demo.blog.dto.BlogRepoResponse;
 import com.md_blog.demo.blog.entity.BlogRepositoryEntity;
 import com.md_blog.demo.blog.repository.BlogRepositoryJpaRepository;
 import com.md_blog.demo.repo.entity.RepositoryEntity;
@@ -17,10 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,10 +37,39 @@ public class BlogService {
         User user = userRepository.findByGithubUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        boolean hasBlog = !blogRepositoryJpaRepository.findByUserIdAndActiveTrue(user.getId()).isEmpty();
-        if (!hasBlog) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No blog found");
+        List<BlogRepositoryEntity> blogRepos = blogRepositoryJpaRepository.findByUserIdAndActiveTrue(user.getId());
+        if (blogRepos.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No blog found");
 
-        return new BlogMainResponse(user.getGithubUsername(), user.getName(), user.getAvatarUrl());
+        // user_repositories 조회
+        Set<UUID> userRepoIds = blogRepos.stream()
+                .map(BlogRepositoryEntity::getUserRepositoryId)
+                .collect(Collectors.toSet());
+        Map<UUID, UUID> userRepoIdToRepoId = userRepositoryJpaRepository.findAllById(userRepoIds).stream()
+                .collect(Collectors.toMap(UserRepositoryEntity::getId, UserRepositoryEntity::getRepositoryId));
+
+        // repositories 조회
+        Map<UUID, RepositoryEntity> repoById = repositoryJpaRepository
+                .findAllById(new HashSet<>(userRepoIdToRepoId.values())).stream()
+                .collect(Collectors.toMap(RepositoryEntity::getId, r -> r));
+
+        List<BlogRepoResponse> repos = blogRepos.stream()
+                .map(br -> {
+                    UUID repoId = userRepoIdToRepoId.get(br.getUserRepositoryId());
+                    if (repoId == null) return null;
+                    RepositoryEntity repo = repoById.get(repoId);
+                    if (repo == null) return null;
+                    return new BlogRepoResponse(
+                            repo.getGithubRepoId(),
+                            repo.getName(),
+                            repo.getDescription(),
+                            repo.getLanguage(),
+                            repo.getHtmlUrl()
+                    );
+                })
+                .filter(Objects::nonNull)
+                .toList();
+
+        return new BlogMainResponse(user.getGithubUsername(), user.getName(), user.getAvatarUrl(), repos);
     }
 
     @Transactional(readOnly = true)
@@ -54,7 +81,6 @@ public class BlogService {
                 .map(BlogRepositoryEntity::getUserRepositoryId)
                 .collect(Collectors.toSet());
 
-        // user_repositories → repository_id → github_repo_id
         List<UserRepositoryEntity> userRepos = userRepositoryJpaRepository.findAllById(userRepoIds);
         Set<UUID> repoIds = userRepos.stream()
                 .map(UserRepositoryEntity::getRepositoryId)
@@ -69,13 +95,11 @@ public class BlogService {
         List<RepositoryEntity> repos = repositoryJpaRepository.findAllByGithubRepoIdIn(githubRepoIds);
 
         for (RepositoryEntity repo : repos) {
-            // user_repositories에서 해당 (user, repo) 링크 조회
             UserRepositoryEntity userRepo = userRepositoryJpaRepository
                     .findByUserIdAndRepositoryId(user.getId(), repo.getId())
                     .orElse(null);
             if (userRepo == null || !userRepo.isActive()) continue;
 
-            // 스냅샷이 없으면 빈 스냅샷 생성 (추후 sync 시 채워짐)
             RepositorySnapshotEntity snapshot = snapshotJpaRepository
                     .findByRepositoryId(repo.getId())
                     .orElseGet(() -> snapshotJpaRepository.save(
@@ -86,19 +110,23 @@ public class BlogService {
                                     .build()
                     ));
 
-            blogRepositoryJpaRepository
+            BlogRepositoryEntity blogRepo = blogRepositoryJpaRepository
                     .findByUserIdAndUserRepositoryId(user.getId(), userRepo.getId())
-                    .ifPresentOrElse(
-                            existing -> existing.activate(snapshot.getId()),
-                            () -> blogRepositoryJpaRepository.save(
-                                    BlogRepositoryEntity.builder()
-                                            .userId(user.getId())
-                                            .userRepositoryId(userRepo.getId())
-                                            .snapshotId(snapshot.getId())
-                                            .active(true)
-                                            .build()
-                            )
-                    );
+                    .orElse(null);
+
+            if (blogRepo == null) {
+                blogRepo = blogRepositoryJpaRepository.save(
+                        BlogRepositoryEntity.builder()
+                                .userId(user.getId())
+                                .userRepositoryId(userRepo.getId())
+                                .snapshotId(snapshot.getId())
+                                .active(true)
+                                .build()
+                );
+            } else {
+                blogRepo.activate(snapshot.getId());
+            }
+
         }
     }
 
@@ -106,7 +134,6 @@ public class BlogService {
         List<RepositoryEntity> repos = repositoryJpaRepository.findAllByGithubRepoIdIn(githubRepoIds);
         Set<UUID> repoIds = repos.stream().map(RepositoryEntity::getId).collect(Collectors.toSet());
 
-        // user_repositories에서 해당 링크 조회
         List<UserRepositoryEntity> userRepos = userRepositoryJpaRepository
                 .findByUserIdAndRepositoryIdIn(user.getId(), repoIds);
         Set<UUID> userRepoIds = userRepos.stream()

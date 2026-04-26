@@ -2,7 +2,7 @@
 
 ## Part 1: 서브도메인 라우팅 + 블로그 메인
 
-**Status:** 기본 구현 완료
+**Status:** 구현 완료
 
 ### 목적
 `username.md-blog.org` 주소로 접근하면 해당 유저의 블로그 메인 페이지를 보여준다.
@@ -17,27 +17,47 @@
 
 `App.tsx`의 `getBlogUsername()` 함수가 hostname 파싱을 담당한다.
 
-### 현재 구현된 블로그 메인 화면
-- 유저 아바타, GitHub username, name 표시
-- 존재하지 않는 username이면 404 메시지
+### 블로그 메인 화면 구성
+
+#### 상단: 유저 프로필
+- 아바타, GitHub username, name 표시
+
+#### 하단: 블로그 레포 카드 목록
+유저가 블로그로 지정한 레포를 카드 형태로 나열한다.
+
+각 카드에 표시할 정보:
+- 레포 이름 (GitHub 링크)
+- 언어 태그
+- GitHub description
+- "GitHub에서 보기" 링크
 
 ### 수용 기준
 
 - [x] 서브도메인 접근 시 일반 앱 라우팅을 완전히 우회
 - [x] username에 해당하는 유저가 없으면 404 화면
 - [x] API 오류 시 에러 메시지
+- [x] 블로그 레포 목록 카드 표시
+- [x] 레포별 GitHub description 표시
 
 ### API
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/api/blog/{username}` | 블로그 메인 정보 반환 |
+기존 `/api/blog/{username}` 응답에 블로그 레포 목록을 포함하도록 확장.
 
 ```typescript
+// GET /api/blog/{username} 응답
 BlogMain {
   username: string
   name: string | null
   avatarUrl: string | null
+  repos: BlogRepo[]
+}
+
+BlogRepo {
+  githubRepoId: number
+  name: string
+  description: string | null
+  language: string | null
+  htmlUrl: string
 }
 ```
 

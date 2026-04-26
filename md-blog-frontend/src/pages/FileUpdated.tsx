@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLang } from "../context/LangContext";
 import { getFileDetail, type FileDetail, type FileDetailCommit } from "../api/repoApi";
+import { FILEUPDATED_I18N } from "../i18n/fileupdated";
 import styles from "./FileUpdated.module.css";
 
 type DiffLineType = "hunk" | "add" | "del" | "ctx";
@@ -137,9 +139,11 @@ function DiffSplit({ lines }: { lines: DiffLine[] }) {
 
 function FileUpdated() {
   const { token } = useAuth();
+  const { lang } = useLang();
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as LocationState | null;
+  const t = FILEUPDATED_I18N[lang];
 
   const [data, setData] = useState<FileDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -164,7 +168,7 @@ function FileUpdated() {
   if (!state) return null;
 
   const { repoFullName, repoName, filePath } = state;
-  const today = new Date().toLocaleDateString("ko-KR", {
+  const today = new Date().toLocaleDateString(t.dateLocale, {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -180,7 +184,7 @@ function FileUpdated() {
           </a>
         </nav>
         <main className={styles.main}>
-          <div className={styles.timelineLabel}>불러오는 중...</div>
+          <div className={styles.timelineLabel}>{t.loading}</div>
         </main>
       </>
     );
@@ -197,11 +201,11 @@ function FileUpdated() {
         </nav>
         <main className={styles.main}>
           <div className={styles.breadcrumb}>
-            <a href="/main">대시보드</a>
+            <a href="/main">{t.breadcrumb_dashboard}</a>
             <span className={styles.breadcrumbSep}>›</span>
             <span className={styles.breadcrumbCur}>{filePath}</span>
           </div>
-          <div className={styles.timelineLabel}>오늘 이 파일의 변경 커밋이 없습니다.</div>
+          <div className={styles.timelineLabel}>{t.no_commits}</div>
         </main>
       </>
     );
@@ -223,9 +227,9 @@ function FileUpdated() {
 
       <main className={styles.main}>
         <div className={styles.breadcrumb}>
-          <a href="/main">대시보드</a>
+          <a href="/main">{t.breadcrumb_dashboard}</a>
           <span className={styles.breadcrumbSep}>›</span>
-          <a href="/main">오늘의 업데이트</a>
+          <a href="/main">{t.breadcrumb_updates}</a>
           <span className={styles.breadcrumbSep}>›</span>
           <a href="/main">{repoName}</a>
           <span className={styles.breadcrumbSep}>›</span>
@@ -250,19 +254,17 @@ function FileUpdated() {
               {repoName}
             </span>
             <span className={styles.metaItem}>
-              오늘 커밋 <strong className={styles.metaStrong}>{data.commits.length}</strong>개
+              {t.meta_commits} <strong className={styles.metaStrong}>{data.commits.length}</strong>
             </span>
             <span className={styles.metaItem}>
-              총 <span className={styles.diffAdd}>+{data.totalAdd}</span>&nbsp;
+              {t.meta_total} <span className={styles.diffAdd}>+{data.totalAdd}</span>&nbsp;
               <span className={styles.sepColor}>/</span>&nbsp;
               <span className={styles.diffDel}>−{data.totalDel}</span>
             </span>
           </div>
         </div>
 
-        <div className={styles.timelineLabel}>
-          오늘 커밋 타임라인 — 클릭하면 해당 diff를 확인할 수 있습니다
-        </div>
+        <div className={styles.timelineLabel}>{t.timeline_label}</div>
         <div className={styles.timeline}>
           {data.commits.map((c, i) => (
             <div
@@ -300,7 +302,7 @@ function FileUpdated() {
 
         <div className={styles.diffSectionHeader}>
           <div className={styles.diffSectionTitle}>
-            커밋 {selectedIdx + 1}/{data.commits.length} — {shortSha(commit.sha)} · {commit.time}
+            {selectedIdx + 1}/{data.commits.length} — {shortSha(commit.sha)} · {commit.time}
           </div>
           <div className={styles.diffSectionMeta}>
             <div className={styles.viewToggle}>
@@ -321,7 +323,7 @@ function FileUpdated() {
               <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
               </svg>
-              GitHub에서 보기
+              {t.gh_link}
             </a>
           </div>
         </div>
@@ -337,7 +339,7 @@ function FileUpdated() {
           </div>
           {diffLines.length === 0 ? (
             <div style={{ padding: "16px", color: "#8b949e", fontSize: "12px", fontFamily: "JetBrains Mono, monospace" }}>
-              diff 정보가 없습니다. (바이너리 파일이거나 변경량이 너무 큰 경우)
+              {t.no_diff}
             </div>
           ) : viewMode === "split" ? (
             <DiffSplit lines={diffLines} />
