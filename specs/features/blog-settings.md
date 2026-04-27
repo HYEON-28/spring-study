@@ -3,6 +3,7 @@
 **Status:** 구현 완료
 
 ## 목적
+
 연동된 레포 중 블로그로 공개할 레포를 선택하고 관리한다.
 
 ## 사용자 시나리오
@@ -21,11 +22,11 @@
 
 ## API
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/api/blog/repos` | 블로그 지정된 githubRepoId 목록 |
-| POST | `/api/blog/repos/add` | 블로그 레포 추가 |
-| POST | `/api/blog/repos/remove` | 블로그 레포 제거 |
+| 메서드 | 경로                     | 설명                            |
+| ------ | ------------------------ | ------------------------------- |
+| GET    | `/api/blog/repos`        | 블로그 지정된 githubRepoId 목록 |
+| POST   | `/api/blog/repos/add`    | 블로그 레포 추가                |
+| POST   | `/api/blog/repos/remove` | 블로그 레포 제거                |
 
 ### 요청/응답 타입
 

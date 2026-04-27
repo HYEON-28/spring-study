@@ -25,7 +25,7 @@ public class RepositorySnapshotEntity {
     @Column(name = "sha_tree", length = 40, nullable = false)
     private String shaTree;
 
-    @Column(name = "md_file_count", nullable = false)
+    @Column(name = "md_file_count", columnDefinition = "SMALLINT UNSIGNED", nullable = false)
     private int mdFileCount;
 
     @Column(name = "last_synced_at", nullable = false)
