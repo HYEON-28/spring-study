@@ -1,62 +1,49 @@
 import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { getBlogMain, type BlogMain, type BlogRepo } from "../api/blogApi";
+import BlogNav from "../components/BlogNav";
+import MdFileTree from "../components/MdFileTree";
+import { useLang } from "../context/LangContext";
+import { useGoogleTranslate } from "../hooks/useGoogleTranslate";
 import styles from "./BlogMain.module.css";
 
-const LANG_COLORS: Record<string, string> = {
-  TypeScript: "#3178c6",
-  JavaScript: "#f1e05a",
-  Python: "#3572A5",
-  Go: "#00ADD8",
-  Rust: "#dea584",
-  Java: "#b07219",
-  Kotlin: "#A97BFF",
-  Swift: "#F05138",
-  Ruby: "#701516",
-  "C++": "#f34b7d",
-  C: "#555555",
-  "C#": "#178600",
-  PHP: "#4F5D95",
-  Shell: "#89e051",
-  Dart: "#00B4AB",
+const MARKDOWN_COMPONENTS = {
+  // 코드/코드블록은 자동 번역에서 제외
+  pre: (props: React.HTMLAttributes<HTMLPreElement>) => (
+    <pre translate="no" className="notranslate" {...props} />
+  ),
+  code: (props: React.HTMLAttributes<HTMLElement>) => (
+    <code translate="no" className="notranslate" {...props} />
+  ),
 };
 
-function RepoCard({ repo }: { repo: BlogRepo }) {
-  const langColor = LANG_COLORS[repo.language ?? ""] ?? "#8b949e";
-  const summary = repo.description;
-
+function ReadmePostView({ repo }: { repo: BlogRepo }) {
   return (
-    <div className={styles.repoCard}>
-      <div className={styles.repoCardHeader}>
-        <a
-          className={styles.repoName}
-          href={repo.htmlUrl}
-          target="_blank"
-          rel="noreferrer"
-        >
-          {repo.name}
-        </a>
-        {repo.language && (
-          <span
-            className={styles.langBadge}
-            style={{ borderColor: langColor, color: langColor }}
+    <article className={styles.post}>
+      <header className={styles.postHeader}>
+        <h2 className={styles.postTitle}>
+          <a
+            href={repo.htmlUrl}
+            target="_blank"
+            rel="noreferrer"
+            className={styles.postTitleLink}
+            translate="no"
           >
-            {repo.language}
-          </span>
+            {repo.name}
+          </a>
+        </h2>
+      </header>
+      <div className={styles.postBody}>
+        {repo.readme ? (
+          <ReactMarkdown remarkPlugins={[remarkGfm]} components={MARKDOWN_COMPONENTS}>
+            {repo.readme}
+          </ReactMarkdown>
+        ) : (
+          <p className={styles.noReadme}>README.md가 없습니다.</p>
         )}
       </div>
-      {summary && <p className={styles.repoSummary}>{summary}</p>}
-      <a
-        className={styles.repoGithubLink}
-        href={repo.htmlUrl}
-        target="_blank"
-        rel="noreferrer"
-      >
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z" />
-        </svg>
-        GitHub에서 보기
-      </a>
-    </div>
+    </article>
   );
 }
 
@@ -68,6 +55,8 @@ export default function BlogMain({ username }: Props) {
   const [blog, setBlog] = useState<BlogMain | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState(false);
+  const { lang } = useLang();
+  const { translateTo } = useGoogleTranslate();
 
   useEffect(() => {
     getBlogMain(username)
@@ -77,6 +66,12 @@ export default function BlogMain({ username }: Props) {
         else setError(true);
       });
   }, [username]);
+
+  // README 로드 후 / 저장된 언어 변경 시 번역 적용
+  useEffect(() => {
+    if (!blog) return;
+    translateTo(lang);
+  }, [blog, lang, translateTo]);
 
   if (error) {
     return (
@@ -106,42 +101,51 @@ export default function BlogMain({ username }: Props) {
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.headerInner}>
-          <span className={styles.logo}>md-blog</span>
-        </div>
-      </header>
+      <BlogNav onLangChange={translateTo} />
 
-      <section className={styles.profile}>
-        {blog.avatarUrl ? (
-          <img
-            className={styles.avatar}
-            src={blog.avatarUrl}
-            alt={blog.username}
-          />
-        ) : (
-          <div className={styles.avatarPlaceholder}>
-            {blog.username.charAt(0).toUpperCase()}
-          </div>
-        )}
-        <div className={styles.profileInfo}>
-          <h1 className={styles.username}>{blog.username}</h1>
-          {blog.name && <p className={styles.displayName}>{blog.name}</p>}
-        </div>
-      </section>
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
+          <MdFileTree />
+        </aside>
 
-      <section className={styles.reposSection}>
-        <h2 className={styles.sectionTitle}>Projects</h2>
-        {blog.repos.length === 0 ? (
-          <p className={styles.empty}>공개된 프로젝트가 없습니다.</p>
-        ) : (
-          <div className={styles.reposGrid}>
-            {blog.repos.map((repo) => (
-              <RepoCard key={repo.githubRepoId} repo={repo} />
-            ))}
-          </div>
-        )}
-      </section>
+        <main className={styles.content}>
+          <section className={styles.profile}>
+            {blog.avatarUrl ? (
+              <img
+                className={styles.avatar}
+                src={blog.avatarUrl}
+                alt={blog.username}
+              />
+            ) : (
+              <div className={styles.avatarPlaceholder}>
+                {blog.username.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className={styles.profileInfo}>
+              <h1 className={styles.username} translate="no">
+                {blog.username}
+              </h1>
+              {blog.name && (
+                <p className={styles.displayName} translate="no">
+                  {blog.name}
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section className={styles.postsSection}>
+            {blog.repos.length === 0 ? (
+              <p className={styles.empty}>공개된 프로젝트가 없습니다.</p>
+            ) : (
+              <div className={styles.postsList}>
+                {blog.repos.map((repo) => (
+                  <ReadmePostView key={repo.githubRepoId} repo={repo} />
+                ))}
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
     </div>
   );
 }

@@ -5,5 +5,6 @@ public record BlogRepoResponse(
         String name,
         String description,
         String language,
-        String htmlUrl
+        String htmlUrl,
+        String readme
 ) {}

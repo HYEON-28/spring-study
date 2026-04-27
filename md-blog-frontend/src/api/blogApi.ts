@@ -6,6 +6,7 @@ export interface BlogRepo {
   description: string | null;
   language: string | null;
   htmlUrl: string;
+  readme: string | null;
 }
 
 export interface BlogMain {

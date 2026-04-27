@@ -8,6 +8,7 @@ import com.md_blog.demo.repo.entity.RepositoryEntity;
 import com.md_blog.demo.repo.entity.RepositorySnapshotEntity;
 import com.md_blog.demo.repo.repository.RepositoryJpaRepository;
 import com.md_blog.demo.repo.repository.RepositorySnapshotJpaRepository;
+import com.md_blog.demo.repo.service.GithubApiService;
 import com.md_blog.demo.user.entity.User;
 import com.md_blog.demo.user.entity.UserRepositoryEntity;
 import com.md_blog.demo.user.repository.UserRepository;
@@ -31,6 +32,7 @@ public class BlogService {
     private final RepositorySnapshotJpaRepository snapshotJpaRepository;
     private final UserRepositoryJpaRepository userRepositoryJpaRepository;
     private final UserRepository userRepository;
+    private final GithubApiService githubApiService;
 
     @Transactional(readOnly = true)
     public BlogMainResponse getBlogMain(String username) {
@@ -52,18 +54,21 @@ public class BlogService {
                 .findAllById(new HashSet<>(userRepoIdToRepoId.values())).stream()
                 .collect(Collectors.toMap(RepositoryEntity::getId, r -> r));
 
+        String token = user.getAccessToken();
         List<BlogRepoResponse> repos = blogRepos.stream()
                 .map(br -> {
                     UUID repoId = userRepoIdToRepoId.get(br.getUserRepositoryId());
                     if (repoId == null) return null;
                     RepositoryEntity repo = repoById.get(repoId);
                     if (repo == null) return null;
+                    String readme = githubApiService.getReadme(token, repo.getFullName());
                     return new BlogRepoResponse(
                             repo.getGithubRepoId(),
                             repo.getName(),
                             repo.getDescription(),
                             repo.getLanguage(),
-                            repo.getHtmlUrl()
+                            repo.getHtmlUrl(),
+                            readme
                     );
                 })
                 .filter(Objects::nonNull)

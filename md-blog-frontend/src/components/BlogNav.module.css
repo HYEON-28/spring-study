@@ -1,0 +1,104 @@
+.header {
+  border-bottom: 1px solid rgba(208, 215, 222, 0.45);
+  padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: saturate(180%) blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.logo {
+  font-size: 16px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff6b8a 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.3px;
+}
+
+/* ── 언어 드롭다운 ───────────────────── */
+.langDropdown {
+  position: relative;
+}
+
+.langTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2328;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.langTrigger:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+}
+
+.langIcon {
+  width: 16px;
+  height: 16px;
+  fill: #6366f1;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  color: #6e7781;
+  transition: transform 0.18s;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.langMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(31, 35, 40, 0.10);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  z-index: 20;
+}
+
+.langItem {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #1f2328;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.langItem:hover {
+  background: #f3f4f6;
+}
+
+.langItemActive {
+  background: linear-gradient(90deg, rgba(255, 107, 138, 0.10) 0%, rgba(99, 102, 241, 0.10) 100%);
+  color: #4f46e5;
+  font-weight: 600;
+}

@@ -1,14 +1,18 @@
 package com.md_blog.demo.repo.service;
 
 import com.md_blog.demo.repo.dto.GithubRepoDto;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClient;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class GithubApiService {
 
@@ -84,6 +88,32 @@ public class GithubApiService {
             return List.of();
         }
     }
+
+    /** 레포 루트 README.md 원본 (raw markdown). 없거나 에러면 null. */
+    public String getReadme(String accessToken, String fullName) {
+        String uri = "/repos/" + fullName + "/readme";
+        try {
+            ReadmeResponse res = restClient.get()
+                    .uri(uri)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .body(ReadmeResponse.class);
+            if (res == null || res.content() == null) return null;
+            if ("base64".equalsIgnoreCase(res.encoding())) {
+                String cleaned = res.content().replaceAll("\\s+", "");
+                return new String(Base64.getDecoder().decode(cleaned), StandardCharsets.UTF_8);
+            }
+            return res.content();
+        } catch (RestClientException e) {
+            log.warn("GitHub readme fetch failed: {} ({})", fullName, e.getMessage());
+            return null;
+        } catch (Exception e) {
+            log.warn("GitHub readme decode failed: {}", fullName, e);
+            return null;
+        }
+    }
+
+    public record ReadmeResponse(String name, String path, String content, String encoding) {}
 
     /** 특정 커밋의 파일 변경 상세 */
     public CommitDetail getCommitDetail(String accessToken, String fullName, String sha) {

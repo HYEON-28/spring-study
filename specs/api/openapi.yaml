@@ -168,6 +168,27 @@ components:
           items:
             $ref: '#/components/schemas/FileDetailCommit'
 
+    BlogRepo:
+      type: object
+      properties:
+        githubRepoId:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        language:
+          type: string
+          nullable: true
+        htmlUrl:
+          type: string
+        readme:
+          type: string
+          nullable: true
+          description: 레포 루트 README.md 원본 (raw markdown). 없으면 null.
+
     BlogMain:
       type: object
       properties:
@@ -179,6 +200,10 @@ components:
         avatarUrl:
           type: string
           nullable: true
+        repos:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlogRepo'
 
 paths:
   # ── Auth ──────────────────────────────────────────────────────────────────

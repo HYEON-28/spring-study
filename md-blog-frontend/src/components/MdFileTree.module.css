@@ -1,0 +1,147 @@
+.tree {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+  font-size: 13.5px;
+  color: #1f2328;
+  background: #ffffff;
+  border: 3px solid limegreen; /* 디버그: 트리 카드 영역 표시 */
+  border-radius: 14px;
+  padding: 16px 8px 12px;
+  box-shadow:
+    0 1px 3px rgba(31, 35, 40, 0.06),
+    0 10px 28px rgba(99, 102, 241, 0.10);
+  display: block;
+  width: 307px;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: #6e7781;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  padding: 0 12px;
+}
+
+/* ── 레포 섹션: 카드 내부의 구분된 영역 ────── */
+.repo {
+  border-radius: 10px;
+  padding: 6px 0;
+}
+
+.repo + .repo {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid #eaecef;
+}
+
+.repoHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 8px 12px;
+  background: linear-gradient(90deg, rgba(255, 107, 138, 0.07) 0%, rgba(99, 102, 241, 0.07) 100%);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1f2328;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+  font-family: inherit;
+}
+
+.repoHeader:hover {
+  background: linear-gradient(90deg, rgba(255, 107, 138, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  border-color: rgba(199, 210, 254, 0.7);
+}
+
+.repoName {
+  background: linear-gradient(135deg, #ff6b8a 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.2px;
+}
+
+.repoChildren {
+  margin-top: 6px;
+}
+
+/* ── 노드 row ──────────────────────── */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 5px 12px;
+  border-radius: 6px;
+  text-align: left;
+  color: #24292f;
+}
+
+.rowButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.rowButton:hover,
+a.row:hover {
+  background: #f3f4f6;
+  color: #4f46e5;
+}
+
+.iconSlot {
+  display: inline-block;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: #6e7781;
+}
+
+.rowButton .icon,
+.repoHeader .icon {
+  color: #f59e0b;
+}
+
+.label {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── 펼침 화살표 ────────────────────── */
+.chevron {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  color: #6e7781;
+  transition: transform 0.15s;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
