@@ -4,22 +4,22 @@
 
 ## 인스턴스
 
-| 항목 | 값 |
-|------|----|
-| 엔진 | MySQL |
-| 가용 구성 | **Single-AZ** (월 ~$15) |
-| 배치 | Private Subnet(`Private-a`, `Private-b`) |
-| Subnet Group | `Private-a` + `Private-b` (RDS는 2개 AZ 필수) |
-| Security Group | `rds-sg` (인바운드 3306, source = `fargate-sg`만) |
-| 데이터베이스(스키마) 이름 | `md-blog` |
-| 문자셋 / 콜레이션 | `utf8mb4` / `utf8mb4_0900_ai_ci` |
+| 항목                      | 값                                                |
+| ------------------------- | ------------------------------------------------- |
+| 엔진                      | MySQL                                             |
+| 가용 구성                 | **Single-AZ** (월 ~$15)                           |
+| 배치                      | Private Subnet(`Private-a`, `Private-b`)          |
+| Subnet Group              | `Private-a` + `Private-b` (RDS는 2개 AZ 필수)     |
+| Security Group            | `rds-sg` (인바운드 3306, source = `fargate-sg`만) |
+| 데이터베이스(스키마) 이름 | `md-blog`                                         |
+| 문자셋 / 콜레이션         | `utf8mb4` / `utf8mb4_0900_ai_ci`                  |
 
 ## Single-AZ vs Multi-AZ
 
-| 구성 | 월 비용 | 페일오버 |
-|------|--------|----------|
-| Single-AZ | ~$15 | 수동, 다운타임 발생 |
-| Multi-AZ | ~$30 (인스턴스 2배 + 스토리지 2배) | 1~2분 자동 페일오버 |
+| 구성      | 월 비용                            | 페일오버            |
+| --------- | ---------------------------------- | ------------------- |
+| Single-AZ | ~$15                               | 수동, 다운타임 발생 |
+| Multi-AZ  | ~$30 (인스턴스 2배 + 스토리지 2배) | 1~2분 자동 페일오버 |
 
 **현재 결정:** 개발 초기 단계 → Single-AZ. 매출 발생 또는 SLA 요구 발생 시 Multi-AZ 전환.
 
@@ -54,38 +54,38 @@
 
 EC2 콘솔 → Security Groups → Create
 
-| 항목 | 값 |
-|------|----|
-| Name | `bastion-sg` |
-| VPC | md-blog VPC |
-| Inbound | Type: SSH (22), Source: **My IP** |
-| Outbound | (기본값 전체 허용) |
+| 항목     | 값                               |
+| -------- | -------------------------------- |
+| Name     | `bastion-sg`                     |
+| VPC      | md-blog VPC                      |
+| Inbound  | Type: SSH (22), Source:**My IP** |
+| Outbound | (기본값 전체 허용)               |
 
 ### 2) `rds-sg` 에 Bastion 인바운드 추가
 
 EC2 → Security Groups → `rds-sg` → Edit inbound rules → **Add rule** (기존 `fargate-sg` 규칙은 유지):
 
-| 항목 | 값 |
-|------|----|
-| Type | MySQL/Aurora (3306) |
-| Source | `bastion-sg` (SG 참조) |
+| 항목        | 값                                        |
+| ----------- | ----------------------------------------- |
+| Type        | MySQL/Aurora (3306)                       |
+| Source      | `bastion-sg` (SG 참조)                    |
 | Description | `temp bastion access YYYY-MM-DD <reason>` |
 
 ### 3) Bastion EC2 인스턴스 띄우기
 
 EC2 → Launch instance
 
-| 항목 | 값 |
-|------|----|
-| Name | `md-blog-bastion-temp` |
-| AMI | Amazon Linux 2023 |
-| Instance type | **t4g.nano** (시간당 약 $0.0042 ≈ 6원) |
-| Key pair | 신규 생성 후 `.pem` 다운로드 (또는 기존 키 사용) |
-| VPC | md-blog VPC |
-| Subnet | **Public-a** |
-| Auto-assign public IP | **Enable** |
-| Security group | `bastion-sg` |
-| Storage | 8 GB (기본) |
+| 항목                  | 값                                              |
+| --------------------- | ----------------------------------------------- |
+| Name                  | `md-blog-bastion-temp`                          |
+| AMI                   | Amazon Linux 2023                               |
+| Instance type         | **t4g.nano** (시간당 약 $0.0042 ≈ 6원)          |
+| Key pair              | 신규 생성 후`.pem` 다운로드 (또는 기존 키 사용) |
+| VPC                   | md-blog VPC                                     |
+| Subnet                | **Public-a**                                    |
+| Auto-assign public IP | **Enable**                                      |
+| Security group        | `bastion-sg`                                    |
+| Storage               | 8 GB (기본)                                     |
 
 Launch 후 1분 정도 대기, **Public IPv4 address** 메모.
 
@@ -94,7 +94,7 @@ Launch 후 1분 정도 대기, **Public IPv4 address** 메모.
 새 터미널에서 (이 터미널은 작업 내내 유지):
 
 ```bash
-ssh -i <KEY.pem> -L 3306:<RDS_ENDPOINT>:3306 ec2-user@<BASTION_PUBLIC_IP>
+ssh -i <KEY.pem> -L 13306:<RDS_ENDPOINT>:3306 ec2-user@<BASTION_PUBLIC_IP>
 ```
 
 - `<RDS_ENDPOINT>`: RDS 콘솔의 Endpoint (예: `md-blog.xxxxx.ap-northeast-2.rds.amazonaws.com`)
@@ -110,6 +110,7 @@ mysql -h 127.0.0.1 -P 3306 -u <MASTER_USER> -p
 `localhost:3306` → SSH 터널 → RDS 로 전달된다.
 
 DB 최초 생성 시:
+
 ```sql
 CREATE DATABASE `md-blog` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE `md-blog`;

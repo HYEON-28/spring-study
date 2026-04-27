@@ -103,45 +103,12 @@ export default function BlogMain({ username }: Props) {
     <div className={styles.page}>
       <BlogNav onLangChange={translateTo} />
 
-      <div
-        className={styles.layout}
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "flex-start",
-          gap: 32,
-          maxWidth: 1200,
-          margin: "0 auto",
-          padding: "0 24px",
-        }}
-      >
-        <aside
-          className={styles.sidebar}
-          style={{
-            order: -1,
-            flex: "0 0 260px",
-            width: 260,
-            position: "sticky",
-            top: 78,
-            alignSelf: "flex-start",
-            maxHeight: "calc(100vh - 100px)",
-            overflowY: "auto",
-            padding: "24px 0",
-            outline: "2px solid red", /* 디버그: 사이드바 영역 표시 */
-          }}
-        >
+      <div className={styles.layout}>
+        <aside className={styles.sidebar}>
           <MdFileTree />
         </aside>
 
-        <main
-          className={styles.content}
-          style={{
-            order: 1,
-            flex: "1 1 0",
-            minWidth: 0,
-            outline: "2px solid blue", /* 디버그: 본문 영역 표시 */
-          }}
-        >
+        <main className={styles.content}>
           <section className={styles.profile}>
             {blog.avatarUrl ? (
               <img
