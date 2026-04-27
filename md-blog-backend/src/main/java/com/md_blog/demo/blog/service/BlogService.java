@@ -41,7 +41,7 @@ public class BlogService {
         User user = userRepository.findByGithubUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        List<BlogRepositoryEntity> blogRepos = blogRepositoryJpaRepository.findByUserIdAndActiveTrue(user.getId());
+        List<BlogRepositoryEntity> blogRepos = blogRepositoryJpaRepository.findByUserIdAndActiveTrueOrderByDisplayOrderAsc(user.getId());
         if (blogRepos.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No blog found");
 
         // user_repositories 조회
@@ -103,7 +103,7 @@ public class BlogService {
         User user = userRepository.findByGithubUsername(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        List<BlogRepositoryEntity> blogRepos = blogRepositoryJpaRepository.findByUserIdAndActiveTrue(user.getId());
+        List<BlogRepositoryEntity> blogRepos = blogRepositoryJpaRepository.findByUserIdAndActiveTrueOrderByDisplayOrderAsc(user.getId());
         if (blogRepos.isEmpty()) return List.of();
 
         Set<UUID> userRepoIds = blogRepos.stream()
@@ -176,6 +176,7 @@ public class BlogService {
 
     public void addBlogRepos(User user, List<Long> githubRepoIds) {
         List<RepositoryEntity> repos = repositoryJpaRepository.findAllByGithubRepoIdIn(githubRepoIds);
+        int nextOrder = blogRepositoryJpaRepository.findByUserIdAndActiveTrue(user.getId()).size();
 
         for (RepositoryEntity repo : repos) {
             UserRepositoryEntity userRepo = userRepositoryJpaRepository
@@ -198,18 +199,45 @@ public class BlogService {
                     .orElse(null);
 
             if (blogRepo == null) {
-                blogRepo = blogRepositoryJpaRepository.save(
+                blogRepositoryJpaRepository.save(
                         BlogRepositoryEntity.builder()
                                 .userId(user.getId())
                                 .userRepositoryId(userRepo.getId())
                                 .snapshotId(snapshot.getId())
                                 .active(true)
+                                .displayOrder(nextOrder++)
                                 .build()
                 );
             } else {
-                blogRepo.activate(snapshot.getId());
+                blogRepo.activate(snapshot.getId(), nextOrder++);
             }
+        }
+    }
 
+    public void updateBlogRepoOrder(User user, List<Long> orderedGithubRepoIds) {
+        List<RepositoryEntity> repos = repositoryJpaRepository.findAllByGithubRepoIdIn(orderedGithubRepoIds);
+        Map<Long, UUID> githubRepoIdToRepoId = repos.stream()
+                .collect(Collectors.toMap(RepositoryEntity::getGithubRepoId, RepositoryEntity::getId));
+
+        Set<UUID> repoIds = new HashSet<>(githubRepoIdToRepoId.values());
+        Map<UUID, UUID> repoIdToUserRepoId = userRepositoryJpaRepository
+                .findByUserIdAndRepositoryIdIn(user.getId(), repoIds).stream()
+                .collect(Collectors.toMap(UserRepositoryEntity::getRepositoryId, UserRepositoryEntity::getId));
+
+        Set<UUID> userRepoIds = new HashSet<>(repoIdToUserRepoId.values());
+        Map<UUID, BlogRepositoryEntity> userRepoIdToBlogRepo = blogRepositoryJpaRepository
+                .findByUserIdAndUserRepositoryIdIn(user.getId(), userRepoIds).stream()
+                .filter(BlogRepositoryEntity::isActive)
+                .collect(Collectors.toMap(BlogRepositoryEntity::getUserRepositoryId, br -> br));
+
+        for (int i = 0; i < orderedGithubRepoIds.size(); i++) {
+            UUID repoId = githubRepoIdToRepoId.get(orderedGithubRepoIds.get(i));
+            if (repoId == null) continue;
+            UUID userRepoId = repoIdToUserRepoId.get(repoId);
+            if (userRepoId == null) continue;
+            BlogRepositoryEntity blogRepo = userRepoIdToBlogRepo.get(userRepoId);
+            if (blogRepo == null) continue;
+            blogRepo.updateOrder(i);
         }
     }
 

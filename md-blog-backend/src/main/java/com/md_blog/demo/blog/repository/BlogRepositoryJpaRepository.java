@@ -10,6 +10,7 @@ import java.util.UUID;
 
 public interface BlogRepositoryJpaRepository extends JpaRepository<BlogRepositoryEntity, UUID> {
     List<BlogRepositoryEntity> findByUserIdAndActiveTrue(UUID userId);
+    List<BlogRepositoryEntity> findByUserIdAndActiveTrueOrderByDisplayOrderAsc(UUID userId);
     Optional<BlogRepositoryEntity> findByUserIdAndUserRepositoryId(UUID userId, UUID userRepositoryId);
     List<BlogRepositoryEntity> findByUserIdAndUserRepositoryIdIn(UUID userId, Collection<UUID> userRepositoryIds);
 }

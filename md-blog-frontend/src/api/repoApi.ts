@@ -8,6 +8,7 @@ export interface ConnectedRepo {
   htmlUrl: string;
   pushedAt: string;
   blog: boolean;
+  displayOrder: number;
 }
 
 export interface GithubRepo {
@@ -86,6 +87,18 @@ export async function removeBlogRepos(token: string, githubRepoIds: number[]): P
     body: JSON.stringify({ githubRepoIds }),
   });
   if (!res.ok) throw new Error("Failed to remove blog repos");
+}
+
+export async function updateBlogRepoOrder(token: string, orderedGithubRepoIds: number[]): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/blog/repos/order`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ orderedGithubRepoIds }),
+  });
+  if (!res.ok) throw new Error("Failed to update blog repo order");
 }
 
 export interface TodayFileChange {

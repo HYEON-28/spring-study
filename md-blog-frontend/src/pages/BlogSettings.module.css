@@ -394,6 +394,61 @@
   cursor: not-allowed;
 }
 
+.orderButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+.orderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 18px;
+  background: #1c2128;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #8b949e;
+  font-size: 9px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  padding: 0;
+}
+.orderBtn:hover:not(:disabled) {
+  background: #21262d;
+  color: #a371f7;
+  border-color: #a371f7;
+}
+.orderBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btnSaveOrder {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid #3fb950;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3fb950;
+  font-family: "Pretendard", sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.btnSaveOrder:hover {
+  background: rgba(63, 185, 80, 0.1);
+}
+.btnSaveOrder:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 @media (max-width: 600px) {
   .main {
     padding: 24px 14px 60px;

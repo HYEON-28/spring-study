@@ -32,6 +32,10 @@ public class BlogRepositoryEntity {
     @Builder.Default
     private boolean active = true;
 
+    @Column(name = "display_order", nullable = false)
+    @Builder.Default
+    private int displayOrder = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -49,13 +53,18 @@ public class BlogRepositoryEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public void activate(UUID snapshotId) {
+    public void activate(UUID snapshotId, int order) {
         this.active = true;
         this.snapshotId = snapshotId;
+        this.displayOrder = order;
     }
 
     public void deactivate() {
         this.active = false;
+    }
+
+    public void updateOrder(int order) {
+        this.displayOrder = order;
     }
 
 }

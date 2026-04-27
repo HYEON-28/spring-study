@@ -7,5 +7,6 @@ public record ConnectedRepoResponse(
         String language,
         String htmlUrl,
         String pushedAt,
-        boolean blog
+        boolean blog,
+        int displayOrder
 ) {}

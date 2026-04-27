@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./BlogSettings.module.css";
-import { getConnectedRepos, addBlogRepos, removeBlogRepos, type ConnectedRepo } from "../api/repoApi";
+import { getConnectedRepos, addBlogRepos, removeBlogRepos, updateBlogRepoOrder, type ConnectedRepo } from "../api/repoApi";
 import { useAuth } from "../context/AuthContext";
 import { useLang } from "../context/LangContext";
 import { toRelativeTime } from "../utils/time";
@@ -35,6 +35,8 @@ function BlogSettings() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [removing, setRemoving] = useState(false);
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [orderedBlogRepos, setOrderedBlogRepos] = useState<ConnectedRepo[]>([]);
 
   const [allSearch, setAllSearch] = useState("");
   const [allLang, setAllLang] = useState(t.lang_all);
@@ -47,7 +49,12 @@ function BlogSettings() {
     if (!token) return;
     setLoading(true);
     getConnectedRepos(token)
-      .then(setConnectedRepos)
+      .then((repos) => {
+        setConnectedRepos(repos);
+        setOrderedBlogRepos(
+          repos.filter((r) => r.blog).sort((a, b) => a.displayOrder - b.displayOrder)
+        );
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
   };
@@ -89,7 +96,7 @@ function BlogSettings() {
   };
 
   const toggleBlogSelect = (checked: boolean) => {
-    setSelectedBlog(checked ? new Set(blogRepos.map((r) => r.githubRepoId)) : new Set());
+    setSelectedBlog(checked ? new Set(orderedBlogRepos.map((r) => r.githubRepoId)) : new Set());
   };
 
   const handleAddBlog = async () => {
@@ -103,6 +110,39 @@ function BlogSettings() {
       console.error(e);
     } finally {
       setAdding(false);
+    }
+  };
+
+  const moveUp = (id: number) => {
+    setOrderedBlogRepos((prev) => {
+      const idx = prev.findIndex((r) => r.githubRepoId === id);
+      if (idx <= 0) return prev;
+      const next = [...prev];
+      [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+      return next;
+    });
+  };
+
+  const moveDown = (id: number) => {
+    setOrderedBlogRepos((prev) => {
+      const idx = prev.findIndex((r) => r.githubRepoId === id);
+      if (idx < 0 || idx >= prev.length - 1) return prev;
+      const next = [...prev];
+      [next[idx], next[idx + 1]] = [next[idx + 1], next[idx]];
+      return next;
+    });
+  };
+
+  const handleSaveOrder = async () => {
+    if (!token) return;
+    setSavingOrder(true);
+    try {
+      await updateBlogRepoOrder(token, orderedBlogRepos.map((r) => r.githubRepoId));
+      alert("순서가 저장되었습니다");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingOrder(false);
     }
   };
 
@@ -278,20 +318,22 @@ function BlogSettings() {
                 type="checkbox"
                 className={styles.repoCheck}
                 id="sa2"
-                checked={blogRepos.length > 0 && selectedBlog.size === blogRepos.length}
+                checked={orderedBlogRepos.length > 0 && selectedBlog.size === orderedBlogRepos.length}
                 onChange={(e) => toggleBlogSelect(e.target.checked)}
               />
               <label htmlFor="sa2">{t.select_all}</label>
             </div>
             <span className={styles.selInfo}>
-              {t.unit_blog} <strong className={styles.selInfoCountPurple}>{blogRepos.length}</strong>
+              {t.unit_blog} <strong className={styles.selInfoCountPurple}>{orderedBlogRepos.length}</strong>
             </span>
           </div>
           <div className={styles.repoRows}>
-            {blogRepos.length === 0 ? (
+            {orderedBlogRepos.length === 0 ? (
               <div style={{ padding: "16px 18px", fontSize: 13, color: "#8b949e" }}>{t.empty_blog}</div>
             ) : (
-              blogRepos.map((r) => (
+              orderedBlogRepos
+                .filter((r) => r.name.toLowerCase().includes(blogSearch.toLowerCase()))
+                .map((r, idx, arr) => (
                 <div key={r.githubRepoId} className={styles.repoRow} onClick={() => toggleBlog(r.githubRepoId)}>
                   <input
                     type="checkbox"
@@ -310,6 +352,22 @@ function BlogSettings() {
                     <span className={`${styles.tag} ${styles.tagBlog}`}>{t.tag_blog}</span>
                     <span className={styles.repoDate}>{toRelativeTime(r.pushedAt, lang)}</span>
                   </div>
+                  <div className={styles.orderButtons} onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className={styles.orderBtn}
+                      disabled={idx === 0}
+                      onClick={() => moveUp(r.githubRepoId)}
+                      title="위로"
+                    >▲</button>
+                    <button
+                      type="button"
+                      className={styles.orderBtn}
+                      disabled={idx === arr.length - 1}
+                      onClick={() => moveDown(r.githubRepoId)}
+                      title="아래로"
+                    >▼</button>
+                  </div>
                 </div>
               ))
             )}
@@ -318,6 +376,13 @@ function BlogSettings() {
             <span className={styles.actionBarInfo}>
               {selectedBlog.size > 0 ? `${selectedBlog.size}${t.unit_selected}` : t.action_placeholder_remove}
             </span>
+            <button
+              className={styles.btnSaveOrder}
+              disabled={savingOrder}
+              onClick={handleSaveOrder}
+            >
+              {savingOrder ? "저장 중..." : "순서 저장"}
+            </button>
             <button
               className={styles.btnRemoveBlog}
               disabled={selectedBlog.size === 0 || removing}

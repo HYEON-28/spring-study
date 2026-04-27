@@ -4,6 +4,7 @@ import com.md_blog.demo.blog.dto.BlogFileContentResponse;
 import com.md_blog.demo.blog.dto.BlogFileTreeResponse;
 import com.md_blog.demo.blog.dto.BlogMainResponse;
 import com.md_blog.demo.blog.dto.BlogRepoIdsRequest;
+import com.md_blog.demo.blog.dto.BlogRepoOrderRequest;
 import com.md_blog.demo.blog.service.BlogService;
 import com.md_blog.demo.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +64,16 @@ public class BlogController {
     ) {
         if (user == null) return ResponseEntity.status(401).build();
         blogService.removeBlogRepos(user, request.githubRepoIds());
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/repos/order")
+    public ResponseEntity<Void> updateBlogRepoOrder(
+            @AuthenticationPrincipal User user,
+            @RequestBody BlogRepoOrderRequest request
+    ) {
+        if (user == null) return ResponseEntity.status(401).build();
+        blogService.updateBlogRepoOrder(user, request.orderedGithubRepoIds());
         return ResponseEntity.ok().build();
     }
 }

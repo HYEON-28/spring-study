@@ -117,6 +117,7 @@ CREATE TABLE blog_repositories (
   user_repository_id  BINARY(16)    NOT NULL,        -- user_repositories.id 참조
   snapshot_id         BINARY(16)    NOT NULL,        -- 최신 스냅샷 참조
   active           TINYINT(1)    NOT NULL DEFAULT 1,
+  display_order       INT           NOT NULL DEFAULT 0,
   created_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
