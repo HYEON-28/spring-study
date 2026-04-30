@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Bash(bash gradlew *)"
+      "Bash(bash gradlew *)",
+      "Bash(git -C /Users/yeseollee/src/md-blog log --oneline -10)",
+      "Bash(git *)",
+      "Bash(xargs ls *)",
+      "Bash(xargs cat *)",
+      "Bash(aws elbv2 describe-listeners *)",
+      "Bash(aws elbv2 describe-load-balancers *)",
+      "Bash(aws elbv2 describe-rules *)",
+      "Bash(aws elbv2 describe-target-health *)",
+      "Bash(aws cloudfront list-distributions *)",
+      "Bash(aws cloudfront *)",
+      "Read(//tmp/**)",
+      "Bash(aws ecs describe-task-definition *)",
+      "Bash(aws logs describe-log-streams *)",
+      "Bash(aws ecs describe-tasks *)",
+      "Bash(aws logs *)"
     ]
   }
 }

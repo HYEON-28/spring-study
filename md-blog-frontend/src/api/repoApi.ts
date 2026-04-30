@@ -157,3 +157,24 @@ export async function getFileDetail(
   if (!res.ok) throw new Error("Failed to fetch file detail");
   return res.json();
 }
+
+export interface SummaryResult {
+  summary: string;
+}
+
+export async function summarizeToday(
+  token: string,
+  repoFullNames: string[],
+  customPrompt: string
+): Promise<SummaryResult> {
+  const res = await fetch(`${BASE_URL}/api/summary/today`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ repoFullNames, customPrompt }),
+  });
+  if (!res.ok) throw new Error("Failed to summarize");
+  return res.json();
+}

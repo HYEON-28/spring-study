@@ -22,6 +22,7 @@ export const MAIN_I18N: Record<Lang, {
   empty_blog_repos: string;
   empty_updates: string;
   tag_connected: string;
+  btn_learning_summary: string;
 }> = {
   ko: {
     dateLocale: "ko-KR",
@@ -45,6 +46,7 @@ export const MAIN_I18N: Record<Lang, {
     empty_blog_repos: "블로그로 연동된 레포지토리가 없습니다.",
     empty_updates: "오늘 업데이트된 레포지토리가 없습니다.",
     tag_connected: "연동됨",
+    btn_learning_summary: "학습 요약",
   },
   en: {
     dateLocale: "en-US",
@@ -68,6 +70,7 @@ export const MAIN_I18N: Record<Lang, {
     empty_blog_repos: "No blog repositories connected.",
     empty_updates: "No repositories updated today.",
     tag_connected: "Connected",
+    btn_learning_summary: "Summary",
   },
   ja: {
     dateLocale: "ja-JP",
@@ -91,6 +94,7 @@ export const MAIN_I18N: Record<Lang, {
     empty_blog_repos: "ブログ連携のリポジトリがありません。",
     empty_updates: "本日更新されたリポジトリはありません。",
     tag_connected: "連携済み",
+    btn_learning_summary: "学習まとめ",
   },
   zh: {
     dateLocale: "zh-CN",
@@ -114,5 +118,6 @@ export const MAIN_I18N: Record<Lang, {
     empty_blog_repos: "没有已连接的博客仓库。",
     empty_updates: "今日没有更新的仓库。",
     tag_connected: "已连接",
+    btn_learning_summary: "学习总结",
   },
 };

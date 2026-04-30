@@ -20,13 +20,13 @@
 | 블로그 메인 (서브도메인 라우팅)  | [features/blog-viewer.md](features/blog-viewer.md)     |
 | 블로그 메인 (README post 화면)   | [features/blog-main.md](features/blog-main.md)         |
 | 다국어(i18n) 지원                | [features/i18n.md](features/i18n.md)                   |
+| 오늘 학습 요약 (AI)              | [features/learning-summary.md](features/learning-summary.md) |
 
 ### 미구현 (기획됨)
 
 | 스펙                       | 파일                                                           |
 | -------------------------- | -------------------------------------------------------------- |
 | 블로그 md 파일 목록 + 뷰어 | [features/blog-viewer.md](features/blog-viewer.md) (하단 참조) |
-| AI 변경내용 요약           | 미작성                                                         |
 | X(트위터) 자동 트윗        | 미작성                                                         |
 
 ### 참조

@@ -9,6 +9,7 @@ import RepoSettings from "./pages/RepoSettings";
 import BlogSettings from "./pages/BlogSettings";
 import FileUpdated from "./pages/FileUpdated";
 import BlogMain from "./pages/BlogMain";
+import LearningSum from "./pages/LearningSum";
 
 function getBlogUsername(): string | null {
   const hostname = window.location.hostname;
@@ -55,6 +56,7 @@ function App() {
       <Route path="/repoSettings" element={<RepoSettings />} />
       <Route path="/blogSettings" element={<BlogSettings />} />
       <Route path="/file-updated" element={<FileUpdated />} />
+      <Route path="/learning-summary" element={<LearningSum />} />
     </Routes>
   );
 }
