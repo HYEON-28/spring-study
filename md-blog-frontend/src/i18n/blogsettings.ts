@@ -25,6 +25,7 @@ export const BLOGSETTINGS_I18N: Record<Lang, {
   tag_connected: string;
   tag_blog: string;
   loading: string;
+  btn_back: string;
 }> = {
   ko: {
     breadcrumb_dashboard: "대시보드",
@@ -51,6 +52,7 @@ export const BLOGSETTINGS_I18N: Record<Lang, {
     tag_connected: "연동됨",
     tag_blog: "블로그",
     loading: "불러오는 중...",
+    btn_back: "메인으로",
   },
   en: {
     breadcrumb_dashboard: "Dashboard",
@@ -77,6 +79,7 @@ export const BLOGSETTINGS_I18N: Record<Lang, {
     tag_connected: "Connected",
     tag_blog: "Blog",
     loading: "Loading...",
+    btn_back: "Back to Main",
   },
   ja: {
     breadcrumb_dashboard: "ダッシュボード",
@@ -103,6 +106,7 @@ export const BLOGSETTINGS_I18N: Record<Lang, {
     tag_connected: "連携済み",
     tag_blog: "ブログ",
     loading: "読み込み中...",
+    btn_back: "メインへ戻る",
   },
   zh: {
     breadcrumb_dashboard: "仪表盘",
@@ -129,5 +133,6 @@ export const BLOGSETTINGS_I18N: Record<Lang, {
     tag_connected: "已连接",
     tag_blog: "博客",
     loading: "加载中...",
+    btn_back: "返回主页",
   },
 };
