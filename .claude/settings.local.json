@@ -16,7 +16,8 @@
       "Bash(aws ecs describe-task-definition *)",
       "Bash(aws logs describe-log-streams *)",
       "Bash(aws ecs describe-tasks *)",
-      "Bash(aws logs *)"
+      "Bash(aws logs *)",
+      "Bash(xargs grep *)"
     ]
   }
 }
