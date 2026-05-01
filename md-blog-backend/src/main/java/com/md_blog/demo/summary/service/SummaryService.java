@@ -2,15 +2,17 @@ package com.md_blog.demo.summary.service;
 
 import com.md_blog.demo.repo.dto.TodayUpdateResponse;
 import com.md_blog.demo.repo.service.TodayUpdateService;
+import com.md_blog.demo.summary.dto.PromptResponse;
 import com.md_blog.demo.summary.dto.SummaryRequest;
 import com.md_blog.demo.summary.dto.SummaryResponse;
 import com.md_blog.demo.user.entity.User;
+import com.md_blog.demo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +24,18 @@ public class SummaryService {
             "핵심 개념, 구현한 기능, 해결한 문제 등을 중심으로 작성해주세요.\n\n";
 
     private final TodayUpdateService todayUpdateService;
-    private final ClaudeApiService claudeApiService;
+    private final GeminiApiService geminiApiService;
+    private final UserRepository userRepository;
+
+    public PromptResponse getCustomPrompt(User user) {
+        return new PromptResponse(user.getSummaryPrompt());
+    }
+
+    @Transactional
+    public void saveCustomPrompt(User user, String prompt) {
+        user.updateSummaryPrompt(prompt != null ? prompt.trim() : null);
+        userRepository.save(user);
+    }
 
     public SummaryResponse summarize(User user, SummaryRequest request) {
         List<TodayUpdateResponse> allUpdates = todayUpdateService.getTodayUpdates(user);
@@ -41,7 +54,11 @@ public class SummaryService {
 
         String context = buildContext(filtered);
         String prompt = resolvePrompt(request.customPrompt()) + context;
-        String summary = claudeApiService.complete(prompt);
+        String summary = geminiApiService.complete(prompt);
+
+        if (request.customPrompt() != null && !request.customPrompt().isBlank()) {
+            saveCustomPrompt(user, request.customPrompt());
+        }
 
         return new SummaryResponse(summary);
     }

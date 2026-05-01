@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
@@ -7,36 +7,52 @@ import {
   getConnectedRepos,
   getTodayUpdates,
   summarizeToday,
+  getSummaryPrompt,
   type TodayUpdateRepo,
 } from "../api/repoApi";
 import { useAuth } from "../context/AuthContext";
-
-const DEFAULT_PROMPT =
-  "아래는 오늘 내가 작업한 GitHub 레포지토리의 변경 내역입니다.\n" +
-  "이를 바탕으로 오늘 내가 학습하거나 작업한 내용을 한국어로 요약해주세요.\n" +
-  "핵심 개념, 구현한 기능, 해결한 문제 등을 중심으로 작성해주세요.";
+import { useLang } from "../context/LangContext";
+import { LEARNINGSUM_I18N } from "../i18n/learningsum";
 
 function LearningSum() {
   const { token } = useAuth();
+  const { lang } = useLang();
   const navigate = useNavigate();
+  const t = LEARNINGSUM_I18N[lang];
 
   const [todayUpdates, setTodayUpdates] = useState<TodayUpdateRepo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
+  const [prompt, setPrompt] = useState(t.default_prompt);
   const [summarizing, setSummarizing] = useState(false);
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const prevDefaultPromptRef = useRef(t.default_prompt);
+
+  useEffect(() => {
+    const newDefault = LEARNINGSUM_I18N[lang].default_prompt;
+    setPrompt((prev) => {
+      if (prev === prevDefaultPromptRef.current) return newDefault;
+      return prev;
+    });
+    prevDefaultPromptRef.current = newDefault;
+  }, [lang]);
 
   useEffect(() => {
     if (!token) return;
     Promise.all([
       getConnectedRepos(token),
       getTodayUpdates(token),
+      getSummaryPrompt(token),
     ])
-      .then(([, updates]) => {
+      .then(([, updates, promptResult]) => {
         setTodayUpdates(updates);
         setSelected(new Set(updates.map((u) => u.repoFullName)));
+        if (promptResult.customPrompt) {
+          setPrompt(promptResult.customPrompt);
+          prevDefaultPromptRef.current = promptResult.customPrompt;
+        }
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -63,7 +79,7 @@ function LearningSum() {
       const result = await summarizeToday(token, Array.from(selected), prompt);
       setSummary(result.summary);
     } catch {
-      setError("요약 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      setError(t.error);
     } finally {
       setSummarizing(false);
     }
@@ -80,21 +96,21 @@ function LearningSum() {
             <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">
               <path d="M7.78 12.53a.75.75 0 01-1.06 0L2.47 8.28a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 1.06L4.81 7h7.44a.75.75 0 010 1.5H4.81l2.97 2.97a.75.75 0 010 1.06z" />
             </svg>
-            메인으로
+            {t.back_btn}
           </button>
-          <div className={styles.title}>오늘 학습 요약</div>
-          <div className={styles.subtitle}>오늘 작업한 레포지토리를 선택하고 AI로 학습 내용을 요약합니다.</div>
+          <div className={styles.title}>{t.title}</div>
+          <div className={styles.subtitle}>{t.subtitle}</div>
         </div>
 
         <div className={styles.card}>
-          <div className={styles.cardTitle}>요약할 레포지토리 선택</div>
+          <div className={styles.cardTitle}>{t.card_repo_title}</div>
           {loading ? (
             <div className={styles.loadingState}>
               <div className={styles.spinner} />
-              불러오는 중...
+              {t.loading}
             </div>
           ) : todayUpdates.length === 0 ? (
-            <div className={styles.errorText}>오늘 업데이트된 레포지토리가 없습니다.</div>
+            <div className={styles.errorText}>{t.empty_updates}</div>
           ) : (
             <div className={styles.repoList}>
               {todayUpdates.map((u) => {
@@ -115,7 +131,7 @@ function LearningSum() {
                     <span className={styles.repoName}>{u.repoFullName}</span>
                     {updatedFullNames.has(u.repoFullName) && (
                       <span className={styles.repoUpdatedBadge}>
-                        {u.files.length}개 파일 변경
+                        {u.files.length}{t.unit_file_changed}
                       </span>
                     )}
                   </div>
@@ -126,7 +142,7 @@ function LearningSum() {
         </div>
 
         <div className={styles.card}>
-          <div className={styles.cardTitle}>요약 프롬프트 (수정 가능)</div>
+          <div className={styles.cardTitle}>{t.card_prompt_title}</div>
           <textarea
             className={styles.promptTextarea}
             value={prompt}
@@ -144,19 +160,19 @@ function LearningSum() {
             {summarizing ? (
               <>
                 <div className={styles.spinner} />
-                요약 중...
+                {t.btn_summarizing}
               </>
             ) : (
               <>
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M0 1.75A.75.75 0 01.75 1h4.253c1.227 0 2.317.59 3 1.501A3.744 3.744 0 0111.006 1h4.245a.75.75 0 01.75.75v10.5a.75.75 0 01-.75.75h-4.507a2.25 2.25 0 00-1.591.659l-.622.621a.75.75 0 01-1.06 0l-.622-.621A2.25 2.25 0 005.258 13H.75a.75.75 0 01-.75-.75zm7.251 10.324l.004-5.073-.002-2.253A2.25 2.25 0 005.003 2.5H1.5v9h3.757a3.75 3.75 0 012 .756zM8.755 4.75l-.004 7.322a3.752 3.752 0 012-.572H14.5v-9h-3.495a2.25 2.25 0 00-2.25 2.25z" />
                 </svg>
-                요약하기
+                {t.btn_summarize}
               </>
             )}
           </button>
           {selected.size === 0 && !loading && (
-            <span className={styles.submitHint}>레포지토리를 하나 이상 선택해주세요.</span>
+            <span className={styles.submitHint}>{t.submit_hint}</span>
           )}
         </div>
 
@@ -165,8 +181,8 @@ function LearningSum() {
         {summary && (
           <div className={styles.resultCard}>
             <div className={styles.resultHeader}>
-              <span className={styles.resultTitle}>AI 요약 결과</span>
-              <span className={styles.resultBadge}>Claude</span>
+              <span className={styles.resultTitle}>{t.result_title}</span>
+              <span className={styles.resultBadge}>{t.result_badge}</span>
             </div>
             <div className={styles.resultBody}>{summary}</div>
           </div>

@@ -16,7 +16,21 @@
       "Bash(aws ecs describe-task-definition *)",
       "Bash(aws logs describe-log-streams *)",
       "Bash(aws ecs describe-tasks *)",
-      "Bash(aws logs *)"
+      "Bash(aws logs *)",
+      "Bash(npx tsc *)",
+      "Bash(./mvnw compile *)",
+      "Bash(/usr/libexec/java_home -v 21)",
+      "Bash(/usr/libexec/java_home -v 17)",
+      "Bash(./gradlew compileJava -q)",
+      "Bash(aws acm describe-certificate *)",
+      "Bash(aws acm request-certificate *)",
+      "Bash(aws route53 list-hosted-zones *)",
+      "Bash(aws route53 list-resource-record-sets *)",
+      "Bash(aws elbv2 *)",
+      "Bash(curl -sI https://md-blog.org --max-time 10)",
+      "Bash(curl -v https://md-blog.org --max-time 15)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('ETag:', d['ETag']\\); print\\('Cert ARN:', d['DistributionConfig']['ViewerCertificate'].get\\('ACMCertificateArn','none'\\)\\)\")",
+      "Bash(python3 *)"
     ]
   }
 }

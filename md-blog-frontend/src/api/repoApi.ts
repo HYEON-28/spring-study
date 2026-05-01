@@ -162,6 +162,18 @@ export interface SummaryResult {
   summary: string;
 }
 
+export interface PromptResult {
+  customPrompt: string | null;
+}
+
+export async function getSummaryPrompt(token: string): Promise<PromptResult> {
+  const res = await fetch(`${BASE_URL}/api/summary/prompt`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error("Failed to fetch summary prompt");
+  return res.json();
+}
+
 export async function summarizeToday(
   token: string,
   repoFullNames: string[],

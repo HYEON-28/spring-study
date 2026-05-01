@@ -55,6 +55,9 @@ public class User {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "summary_prompt", columnDefinition = "TEXT")
+    private String summaryPrompt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -64,6 +67,10 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public void updateSummaryPrompt(String summaryPrompt) {
+        this.summaryPrompt = summaryPrompt;
     }
 
     public void updateLoginInfo(String githubUsername, String name, String email,
