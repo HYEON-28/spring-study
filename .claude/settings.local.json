@@ -30,7 +30,8 @@
       "Bash(curl -sI https://md-blog.org --max-time 10)",
       "Bash(curl -v https://md-blog.org --max-time 15)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('ETag:', d['ETag']\\); print\\('Cert ARN:', d['DistributionConfig']['ViewerCertificate'].get\\('ACMCertificateArn','none'\\)\\)\")",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Bash(aws ecs describe-services *)"
     ]
   }
 }

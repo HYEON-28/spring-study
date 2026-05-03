@@ -1,4 +1,4 @@
-import { Navigate, Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useParams } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import AuthCallback from "./pages/AuthCallback";
 import RepoLink from "./pages/RepoLink";
@@ -10,6 +10,12 @@ import BlogSettings from "./pages/BlogSettings";
 import FileUpdated from "./pages/FileUpdated";
 import BlogMain from "./pages/BlogMain";
 import LearningSum from "./pages/LearningSum";
+
+function BlogMainRoute() {
+  const { username } = useParams<{ username: string }>();
+  if (!username) return null;
+  return <BlogMain username={username} />;
+}
 
 function getBlogUsername(): string | null {
   const hostname = window.location.hostname;
@@ -37,6 +43,12 @@ function App() {
     return <BlogMain username={blogUsername} />;
   }
 
+  // /blog/:username 경로도 auth 로딩 없이 즉시 렌더링
+  const blogPathMatch = window.location.pathname.match(/^\/blog\/([^/]+)/);
+  if (blogPathMatch) {
+    return <BlogMain username={blogPathMatch[1]} />;
+  }
+
   if (isLoading) {
     return null;
   }
@@ -57,6 +69,7 @@ function App() {
       <Route path="/blogSettings" element={<BlogSettings />} />
       <Route path="/file-updated" element={<FileUpdated />} />
       <Route path="/learning-summary" element={<LearningSum />} />
+      <Route path="/blog/:username" element={<BlogMainRoute />} />
     </Routes>
   );
 }
