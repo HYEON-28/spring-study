@@ -32,7 +32,7 @@ export const LANDING_I18N: Record<Lang, Record<string, string>> = {
       "날짜별 요약이 자동으로 쌓입니다. 지난 날의 작업 기록을 블로그 포스트처럼 언제든 다시 찾아볼 수 있습니다.",
     demo_h2: "commit → 요약 → 공유,<br>단 3단계",
     demo_p:
-      "평소처럼 코드를 push하면 GitBlog가 알아서 변경 내용을 분석하고 읽기 좋은 글로 만들어 줍니다.",
+      "평소처럼 코드를 push하면 Md-Blog가 알아서 변경 내용을 분석하고 읽기 좋은 글로 만들어 줍니다.",
     demo_cta: "무료로 시작하기 →",
     demo_card_title: "오늘의 변경사항 — main.py",
     ai_label: "✦ AI 요약",
@@ -74,7 +74,7 @@ export const LANDING_I18N: Record<Lang, Record<string, string>> = {
       "Daily summaries accumulate automatically. Browse past work like blog posts — anytime, without digging through commits.",
     demo_h2: "commit → summarize → share,<br>just 3 steps",
     demo_p:
-      "Push code as usual and GitBlog automatically analyzes your changes and turns them into a readable post.",
+      "Push code as usual and Md-Blog automatically analyzes your changes and turns them into a readable post.",
     demo_cta: "Get started for free →",
     demo_card_title: "today's changes — main.py",
     ai_label: "✦ AI Summary",
@@ -116,7 +116,7 @@ export const LANDING_I18N: Record<Lang, Record<string, string>> = {
       "日付別の要約が自動で蓄積されます。過去の作業記録をブログ記事のようにいつでも振り返れます。",
     demo_h2: "commit → 要約 → シェア、<br>たった3ステップ",
     demo_p:
-      "普段通りにコードをpushするだけ。GitBlogが変更内容を分析し、読みやすい記事に仕上げます。",
+      "普段通りにコードをpushするだけ。Md-Blogが変更内容を分析し、読みやすい記事に仕上げます。",
     demo_cta: "無料で始める →",
     demo_card_title: "今日の変更 — main.py",
     ai_label: "✦ AI要約",
@@ -155,7 +155,7 @@ export const LANDING_I18N: Record<Lang, Record<string, string>> = {
     f6_desc: "按日期自动积累摘要，随时像翻阅博客文章一样回顾过去的工作记录。",
     demo_h2: "commit → 摘要 → 分享，<br>只需 3 步",
     demo_p:
-      "像往常一样 push 代码，GitBlog 会自动分析变更内容并生成易读的文章。",
+      "像往常一样 push 代码，Md-Blog 会自动分析变更内容并生成易读的文章。",
     demo_cta: "免费开始使用 →",
     demo_card_title: "今日变更 — main.py",
     ai_label: "✦ AI 摘要",

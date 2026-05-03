@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/logout", "/health").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**", "/auth/logout", "/health", "/error").permitAll()
                         .requestMatchers("/api/blog/**").permitAll()
                         .requestMatchers("/auth/me").authenticated()
                         .anyRequest().authenticated()

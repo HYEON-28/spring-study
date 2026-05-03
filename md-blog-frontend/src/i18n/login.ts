@@ -2,7 +2,7 @@ import type { Lang } from ".";
 
 export const LOGIN_I18N: Record<Lang, Record<string, string>> = {
   ko: {
-    badge: "Sign in to GitBlog",
+    badge: "Sign in to Md-Blog",
     title_html:
       'GitHub 계정으로<br><span class="highlight">한 번에 시작</span>하세요',
     desc_html: "GitHub OAuth로 로그인하고<br>레포를 블로그처럼 관리해 보세요.",
@@ -15,7 +15,7 @@ export const LOGIN_I18N: Record<Lang, Record<string, string>> = {
     note_suffix: "에 동의하게 됩니다.",
   },
   en: {
-    badge: "Sign in to GitBlog",
+    badge: "Sign in to Md-Blog",
     title_html:
       'Get started with your<br><span class="highlight">GitHub account</span>',
     desc_html:
@@ -29,7 +29,7 @@ export const LOGIN_I18N: Record<Lang, Record<string, string>> = {
     note_suffix: ".",
   },
   ja: {
-    badge: "Sign in to GitBlog",
+    badge: "Sign in to Md-Blog",
     title_html:
       'GitHubアカウントで<br><span class="highlight">すぐに始め</span>よう',
     desc_html:
@@ -43,7 +43,7 @@ export const LOGIN_I18N: Record<Lang, Record<string, string>> = {
     note_suffix: " に同意したものとみなされます。",
   },
   zh: {
-    badge: "Sign in to GitBlog",
+    badge: "Sign in to Md-Blog",
     title_html:
       '使用 GitHub 账号<br><span class="highlight">一键开始</span>',
     desc_html: "通过 GitHub OAuth 登录，<br>像博客一样管理你的仓库。",

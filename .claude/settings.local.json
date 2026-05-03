@@ -38,7 +38,8 @@
       "Bash(dig +short md-blog.org)",
       "Bash(dig +short api.md-blog.org)",
       "Bash(curl -v -o /dev/null https://hyeon-28.md-blog.org)",
-      "Bash(curl -sS -o /dev/null -w \"%{http_code} -> %{redirect_url}\\\\n\" -L --max-redirs 5 https://hyeon-28.md-blog.org)"
+      "Bash(curl -sS -o /dev/null -w \"%{http_code} -> %{redirect_url}\\\\n\" -L --max-redirs 5 https://hyeon-28.md-blog.org)",
+      "Bash(./gradlew.bat compileJava -q)"
     ]
   }
 }

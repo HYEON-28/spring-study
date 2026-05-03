@@ -24,7 +24,7 @@ public class SummaryService {
             "핵심 개념, 구현한 기능, 해결한 문제 등을 중심으로 작성해주세요.\n\n";
 
     private final TodayUpdateService todayUpdateService;
-    private final GeminiApiService geminiApiService;
+    private final ClaudeApiService claudeApiService;
     private final UserRepository userRepository;
 
     public PromptResponse getCustomPrompt(User user) {
@@ -54,7 +54,7 @@ public class SummaryService {
 
         String context = buildContext(filtered);
         String prompt = resolvePrompt(request.customPrompt()) + context;
-        String summary = geminiApiService.complete(prompt);
+        String summary = claudeApiService.complete(prompt);
 
         if (request.customPrompt() != null && !request.customPrompt().isBlank()) {
             saveCustomPrompt(user, request.customPrompt());

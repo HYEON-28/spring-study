@@ -7,7 +7,7 @@ interface LangContextValue {
 }
 
 const STORAGE_KEY = "md-blog.lang";
-const DEFAULT_LANG: Lang = "ko";
+const DEFAULT_LANG: Lang = "ja";
 const VALID_LANGS: Lang[] = ["ko", "en", "ja", "zh"];
 
 function readStoredLang(): Lang {

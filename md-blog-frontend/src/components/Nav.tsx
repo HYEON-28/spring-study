@@ -48,7 +48,7 @@ function Nav() {
           />
         </svg>
         <span className="wordmark">
-          Git<span className={styles.navLogoAccent}>Blog</span>
+          Md-<span className={styles.navLogoAccent}>Blog</span>
         </span>
       </Link>
       <div className={styles.navActions}>
