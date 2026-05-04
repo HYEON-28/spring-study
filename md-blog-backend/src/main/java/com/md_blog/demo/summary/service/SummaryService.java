@@ -21,7 +21,7 @@ public class SummaryService {
     private static final String DEFAULT_PROMPT =
             "아래는 오늘 내가 작업한 GitHub 레포지토리의 변경 내역입니다.\n" +
             "이를 바탕으로 오늘 내가 학습하거나 작업한 내용을 한국어로 요약해주세요.\n" +
-            "핵심 개념, 구현한 기능, 해결한 문제 등을 중심으로 작성해주세요.\n\n";
+            "핵심 개념, 구현한 기능, 해결한 문제 등을 중심으로 트위터 글자제한 280자에 맞추어서 작성해주세요.\n\n";
 
     private final TodayUpdateService todayUpdateService;
     private final ClaudeApiService claudeApiService;

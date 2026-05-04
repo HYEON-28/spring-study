@@ -173,7 +173,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .resultTitle {
   font-size: 13px;
@@ -188,12 +188,90 @@
   border-radius: 20px;
   padding: 2px 8px;
 }
-.resultBody {
-  font-size: 13px;
+.charCount {
+  font-size: 11px;
+  color: #8b949e;
+  margin-left: auto;
+}
+.charCountOver {
+  color: #f85149;
+}
+.resultTextarea {
+  width: 100%;
+  min-height: 120px;
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 8px;
   color: #c9d1d9;
+  font-size: 13px;
+  font-family: "Pretendard", sans-serif;
+  padding: 12px 14px;
+  resize: vertical;
   line-height: 1.8;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
   white-space: pre-wrap;
   word-break: break-word;
+}
+.resultTextarea:focus {
+  outline: none;
+  border-color: #58a6ff;
+}
+.resultFooter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+}
+.tweetSuccess {
+  font-size: 12px;
+  color: #3fb950;
+  flex: 1;
+}
+.tweetError {
+  font-size: 12px;
+  color: #f85149;
+  flex: 1;
+}
+.xBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 16px;
+  background: #000000;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: "Pretendard", sans-serif;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.xBtn:hover:not(:disabled) {
+  background: #1a1a1a;
+}
+.xBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.xIcon {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
+  flex-shrink: 0;
+}
+.spinnerDark {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #333;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
 }
 
 /* LOADING */

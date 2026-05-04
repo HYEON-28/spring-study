@@ -10,7 +10,8 @@ public record UserResponse(
         String name,
         String email,
         String avatarUrl,
-        String githubProfileUrl
+        String githubProfileUrl,
+        boolean twitterConnected
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -19,7 +20,8 @@ public record UserResponse(
                 user.getName(),
                 user.getEmail(),
                 user.getAvatarUrl(),
-                user.getGithubProfileUrl()
+                user.getGithubProfileUrl(),
+                user.isTwitterConnected()
         );
     }
 }

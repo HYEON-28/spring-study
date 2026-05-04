@@ -7,6 +7,7 @@ export interface User {
   email: string | null;
   avatarUrl: string | null;
   githubProfileUrl: string | null;
+  twitterConnected: boolean;
 }
 
 export async function getMe(token: string): Promise<User> {

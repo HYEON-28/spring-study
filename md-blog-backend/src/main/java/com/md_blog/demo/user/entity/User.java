@@ -58,6 +58,18 @@ public class User {
     @Column(name = "summary_prompt", columnDefinition = "TEXT")
     private String summaryPrompt;
 
+    @Column(name = "twitter_id", length = 50)
+    private String twitterId;
+
+    @Column(name = "twitter_username", length = 100)
+    private String twitterUsername;
+
+    @Column(name = "twitter_access_token", columnDefinition = "TEXT")
+    private String twitterAccessToken;
+
+    @Column(name = "twitter_refresh_token", columnDefinition = "TEXT")
+    private String twitterRefreshToken;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -69,8 +81,26 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
+    public boolean isTwitterConnected() {
+        return twitterAccessToken != null && !twitterAccessToken.isBlank();
+    }
+
     public void updateSummaryPrompt(String summaryPrompt) {
         this.summaryPrompt = summaryPrompt;
+    }
+
+    public void connectTwitter(String twitterId, String twitterUsername, String accessToken, String refreshToken) {
+        this.twitterId = twitterId;
+        this.twitterUsername = twitterUsername;
+        this.twitterAccessToken = accessToken;
+        this.twitterRefreshToken = refreshToken;
+    }
+
+    public void disconnectTwitter() {
+        this.twitterId = null;
+        this.twitterUsername = null;
+        this.twitterAccessToken = null;
+        this.twitterRefreshToken = null;
     }
 
     public void updateLoginInfo(String githubUsername, String name, String email,

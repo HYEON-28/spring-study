@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import styles from "./LearningSum.module.css";
@@ -10,14 +10,16 @@ import {
   getSummaryPrompt,
   type TodayUpdateRepo,
 } from "../api/repoApi";
+import { getTwitterAuthUrl, postTweet } from "../api/twitterApi";
 import { useAuth } from "../context/AuthContext";
 import { useLang } from "../context/LangContext";
 import { LEARNINGSUM_I18N } from "../i18n/learningsum";
 
 function LearningSum() {
-  const { token } = useAuth();
+  const { token, user, refreshUser } = useAuth();
   const { lang } = useLang();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const t = LEARNINGSUM_I18N[lang];
 
   const [todayUpdates, setTodayUpdates] = useState<TodayUpdateRepo[]>([]);
@@ -28,7 +30,23 @@ function LearningSum() {
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [posting, setPosting] = useState(false);
+  const [tweetStatus, setTweetStatus] = useState<"success" | "error" | "linked" | "reconnect" | null>(null);
+
   const prevDefaultPromptRef = useRef(t.default_prompt);
+
+  // Twitter OAuth 콜백 처리
+  useEffect(() => {
+    const linked = searchParams.get("twitterLinked");
+    const twitterError = searchParams.get("twitterError");
+    if (linked === "true") {
+      refreshUser().then(() => setTweetStatus("linked"));
+      setSearchParams({}, { replace: true });
+    } else if (twitterError === "true") {
+      setTweetStatus("error");
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
 
   useEffect(() => {
     const newDefault = LEARNINGSUM_I18N[lang].default_prompt;
@@ -75,6 +93,7 @@ function LearningSum() {
     setSummarizing(true);
     setSummary(null);
     setError(null);
+    setTweetStatus(null);
     try {
       const result = await summarizeToday(token, Array.from(selected), prompt);
       setSummary(result.summary);
@@ -85,7 +104,36 @@ function LearningSum() {
     }
   };
 
+  const handlePostToX = async () => {
+    if (!token || !summary) return;
+
+    if (!user?.twitterConnected) {
+      const authUrl = await getTwitterAuthUrl(token).catch(() => null);
+      if (authUrl) window.location.href = authUrl;
+      return;
+    }
+
+    setPosting(true);
+    setTweetStatus(null);
+    try {
+      await postTweet(token, summary);
+      setTweetStatus("success");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "";
+      if (msg === "TWITTER_RECONNECT_REQUIRED") {
+        await refreshUser();
+        setTweetStatus("reconnect");
+      } else {
+        setTweetStatus("error");
+      }
+    } finally {
+      setPosting(false);
+    }
+  };
+
   const updatedFullNames = new Set(todayUpdates.map((u) => u.repoFullName));
+  const charCount = summary?.length ?? 0;
+  const overLimit = charCount > 280;
 
   return (
     <>
@@ -178,13 +226,54 @@ function LearningSum() {
 
         {error && <div className={styles.errorText}>{error}</div>}
 
-        {summary && (
+        {summary !== null && (
           <div className={styles.resultCard}>
             <div className={styles.resultHeader}>
               <span className={styles.resultTitle}>{t.result_title}</span>
               <span className={styles.resultBadge}>{t.result_badge}</span>
+              <span className={`${styles.charCount} ${overLimit ? styles.charCountOver : ""}`}>
+                {t.char_count(charCount)}
+              </span>
             </div>
-            <div className={styles.resultBody}>{summary}</div>
+            <textarea
+              className={styles.resultTextarea}
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              rows={6}
+            />
+            <div className={styles.resultFooter}>
+              {tweetStatus === "success" && (
+                <span className={styles.tweetSuccess}>{t.twitter_success}</span>
+              )}
+              {tweetStatus === "linked" && (
+                <span className={styles.tweetSuccess}>{t.twitter_linked}</span>
+              )}
+              {tweetStatus === "error" && (
+                <span className={styles.tweetError}>{t.twitter_error}</span>
+              )}
+              {tweetStatus === "reconnect" && (
+                <span className={styles.tweetError}>{t.twitter_reconnect}</span>
+              )}
+              <button
+                className={styles.xBtn}
+                onClick={handlePostToX}
+                disabled={posting || !summary}
+              >
+                {posting ? (
+                  <>
+                    <div className={styles.spinnerDark} />
+                    {t.btn_posting_x}
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 24 24" className={styles.xIcon} aria-hidden="true">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    {user?.twitterConnected ? t.btn_post_x : t.btn_connect_x}
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
       </main>
