@@ -156,12 +156,14 @@ export default function MdFileTree({ username, selectedPath, onFileSelect }: Pro
 
   useEffect(() => {
     getBlogFileTree(username)
-      .then((data) => {
-        setRepos(data);
-        translateTo(lang);
-      })
+      .then((data) => setRepos(data))
       .catch(() => setRepos([]));
   }, [username]);
+
+  useEffect(() => {
+    if (repos.length === 0) return;
+    translateTo(lang);
+  }, [repos, lang, translateTo]);
 
   return (
     <nav className={styles.tree} aria-label="md 파일 트리" role="tree">

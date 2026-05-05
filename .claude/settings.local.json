@@ -39,7 +39,17 @@
       "Bash(dig +short api.md-blog.org)",
       "Bash(curl -v -o /dev/null https://hyeon-28.md-blog.org)",
       "Bash(curl -sS -o /dev/null -w \"%{http_code} -> %{redirect_url}\\\\n\" -L --max-redirs 5 https://hyeon-28.md-blog.org)",
-      "Bash(./gradlew.bat compileJava -q)"
+      "Bash(./gradlew.bat compileJava -q)",
+      "Bash(aws sts get-caller-identity *)",
+      "Bash(aws ec2 describe-instances *)",
+      "Bash(aws ec2 describe-regions *)",
+      "Bash(aws elb *)",
+      "Bash(aws s3api *)",
+      "Bash(aws s3 *)",
+      "Bash(dig md-blog.org NS)",
+      "Bash(dig md-blog.org A)",
+      "Bash(dig @ns-1202.awsdns-22.org md-blog.org A)",
+      "Bash(dig md-blog.org NS +norecurse @8.8.8.8)"
     ]
   }
 }

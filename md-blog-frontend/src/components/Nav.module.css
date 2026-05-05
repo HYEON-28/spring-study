@@ -22,11 +22,11 @@
   color: var(--gh-text);
   text-decoration: none;
 }
-.navLogo svg {
+.navLogoIcon {
   width: 28px;
   height: 28px;
-  fill: var(--gh-text);
   flex-shrink: 0;
+  border-radius: 5px;
 }
 .navLogoAccent {
   color: var(--gh-accent);
