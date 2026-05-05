@@ -1,6 +1,5 @@
 package com.md_blog.demo.twitter.service;
 
-import com.md_blog.demo.twitter.store.TwitterPendingAuthStore;
 import com.md_blog.demo.user.entity.User;
 import com.md_blog.demo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +30,7 @@ public class TwitterService {
 
     private static final String AUTH_BASE = "https://twitter.com";
     private static final String API_BASE = "https://api.twitter.com";
+    private static final String COOKIE_DELIMITER = "|";
 
     @Value("${twitter.client-id:}")
     private String clientId;
@@ -45,18 +45,21 @@ public class TwitterService {
     private String frontendUrl;
 
     private final UserRepository userRepository;
-    private final TwitterPendingAuthStore pendingAuthStore;
 
-    public String generateAuthUrl(UUID userId) {
+    public record AuthUrlResult(String authUrl, String cookiePayload) {}
+
+    public AuthUrlResult generateAuthUrl(UUID userId) {
         String codeVerifier = generateCodeVerifier();
         String codeChallenge = generateCodeChallenge(codeVerifier);
         String state = generateState();
+        long expiresAt = Instant.now().plusSeconds(600).getEpochSecond();
 
-        pendingAuthStore.put(state, new TwitterPendingAuthStore.PendingAuth(
-                userId, codeVerifier, Instant.now().plusSeconds(600)
-        ));
+        String raw = state + COOKIE_DELIMITER + codeVerifier + COOKIE_DELIMITER
+                + userId + COOKIE_DELIMITER + expiresAt;
+        String cookiePayload = Base64.getUrlEncoder().withoutPadding()
+                .encodeToString(raw.getBytes(StandardCharsets.UTF_8));
 
-        return AUTH_BASE + "/i/oauth2/authorize" +
+        String authUrl = AUTH_BASE + "/i/oauth2/authorize" +
                 "?response_type=code" +
                 "&client_id=" + encode(clientId) +
                 "&redirect_uri=" + encode(redirectUri) +
@@ -64,14 +67,15 @@ public class TwitterService {
                 "&state=" + state +
                 "&code_challenge=" + codeChallenge +
                 "&code_challenge_method=S256";
+
+        return new AuthUrlResult(authUrl, cookiePayload);
     }
 
     @Transactional
-    public String handleCallback(String code, String state) {
-        TwitterPendingAuthStore.PendingAuth pending = pendingAuthStore.getAndRemove(state)
-                .orElseThrow(() -> new IllegalStateException("Invalid or expired state"));
-
+    public String handleCallback(String code, String state, String cookiePayload) {
         try {
+            PendingAuth pending = decodeCookie(state, cookiePayload);
+
             String credentials = Base64.getEncoder().encodeToString(
                     (clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
 
@@ -126,6 +130,31 @@ public class TwitterService {
             return frontendUrl + "/learning-summary?twitterError=true";
         }
     }
+
+    private PendingAuth decodeCookie(String state, String cookiePayload) {
+        if (cookiePayload == null || cookiePayload.isBlank()) {
+            throw new IllegalStateException("Missing twitter_pending_auth cookie");
+        }
+        String raw = new String(Base64.getUrlDecoder().decode(cookiePayload), StandardCharsets.UTF_8);
+        String[] parts = raw.split("\\|", 4);
+        if (parts.length != 4) {
+            throw new IllegalStateException("Malformed twitter_pending_auth cookie");
+        }
+        String cookieState = parts[0];
+        String codeVerifier = parts[1];
+        UUID userId = UUID.fromString(parts[2]);
+        Instant expiresAt = Instant.ofEpochSecond(Long.parseLong(parts[3]));
+
+        if (!state.equals(cookieState)) {
+            throw new IllegalStateException("State mismatch");
+        }
+        if (expiresAt.isBefore(Instant.now())) {
+            throw new IllegalStateException("Auth expired");
+        }
+        return new PendingAuth(userId, codeVerifier);
+    }
+
+    private record PendingAuth(UUID userId, String codeVerifier) {}
 
     @Transactional
     public void postTweet(User user, String text) {
