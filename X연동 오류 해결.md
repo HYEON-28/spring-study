@@ -217,3 +217,54 @@ const res = await fetch(`${BASE_URL}/api/twitter/auth-url`, {
 #### 추후 추가 개선 후보
 
 콜백 실패 시 원인을 프론트에서 구분할 수 있도록 `?twitterError=cookie_missing | state_mismatch | token_exchange_failed | user_info_failed` 로 세분화하면 다음 디버깅이 훨씬 빠름. 현재는 모두 한 묶음의 `?twitterError=true` 라 매번 CloudWatch를 봐야 함.
+
+### 4차: `/2/users/me` 403 Forbidden — `tweet.read` scope 누락 (적용)
+
+#### 증상
+
+3차 fix 배포 후 콜백까지 도달은 하지만 여전히 `?twitterError=true`. CloudWatch에 다음 로그:
+
+```
+ERROR ... c.m.demo.twitter.service.TwitterService : Twitter callback failed
+org.springframework.web.client.HttpClientErrorException$Forbidden:
+  403 Forbidden: "{
+    "title": "Forbidden",
+    "type": "about:blank",
+    "status": 403,
+    "detail": "Forbidden"
+  }"
+```
+
+#### 분석
+
+- 응답 바디 포맷 `{"title":..., "type":"about:blank", "status":..., "detail":...}` 은 **X v2 API (`/2/...`)** 의 표준 에러 포맷.
+- `/2/oauth2/token` 의 에러는 `{"error":"invalid_request","error_description":"..."}` 형식이므로 **다름**.
+- 즉 토큰 교환(`/2/oauth2/token`)은 성공해서 access_token까지는 발급. 다음 단계인 `/2/users/me` 호출에서 403.
+- X 공식 문서상 `/2/users/me` 는 **`users.read` AND `tweet.read`** 두 scope 모두 필요.
+- 그런데 기존 코드는 `tweet.write users.read offline.access` 만 요청 → `tweet.read` 누락 → 발급된 토큰의 권한이 부족 → 403.
+
+→ 이 경우 OAuth Authorize 단계는 통과하고 토큰은 받지만, 이후 protected resource 호출에서 막히는 형태가 됨.
+
+#### 적용한 수정
+
+**1. scope에 `tweet.read` 추가** — `md-blog-backend/.../TwitterService.java:66`
+
+```java
+// Before
+"&scope=" + encode("tweet.write users.read offline.access") +
+// After
+"&scope=" + encode("tweet.read tweet.write users.read offline.access") +
+```
+
+**2. 콜백 catch에 HTTP status/body 별도 로깅 추가** — 다음 번 같은 류의 실패가 났을 때 어떤 상태코드/바디인지 한 번에 보이게 하기 위해. catch 블록에 `HttpStatusCodeException` 분기 추가하여 `e.getStatusCode()` 와 `e.getResponseBodyAsString()` 을 함께 로그.
+
+#### 검증 방법
+
+1. 백엔드 ECS task 재배포 후, 사용자 입장에서는 **기존에 연동된 적이 있어도 X에서 권한 동의를 다시 받아야 함**. (scope가 바뀌면 X가 새 동의 화면을 띄움.)
+2. `/learning-summary` → "X 연동 후 전송" → X Authorize 화면에서 "Read Posts" 권한이 추가로 표시되는지 확인.
+3. Authorize 후 `?twitterLinked=true` 로 돌아오면 성공.
+
+#### 만약 여전히 403이면
+
+- 강화된 로그에 상태코드 + 응답 바디가 함께 찍히므로 어떤 호출이 실패하는지 즉시 식별 가능.
+- 그래도 `/2/users/me` 가 403이라면 X Developer Portal의 "User authentication settings"에서 **App permissions = Read and write** 인지, **Type of App = Web App (Confidential client)** 인지 재확인 (이 파일 원인 2 참조).

@@ -63,7 +63,7 @@ public class TwitterService {
                 "?response_type=code" +
                 "&client_id=" + encode(clientId) +
                 "&redirect_uri=" + encode(redirectUri) +
-                "&scope=" + encode("tweet.write users.read offline.access") +
+                "&scope=" + encode("tweet.read tweet.write users.read offline.access") +
                 "&state=" + state +
                 "&code_challenge=" + codeChallenge +
                 "&code_challenge_method=S256";
@@ -125,6 +125,10 @@ public class TwitterService {
             userRepository.save(user);
 
             return frontendUrl + "/learning-summary?twitterLinked=true";
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            log.error("Twitter callback failed: status={}, body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString(), e);
+            return frontendUrl + "/learning-summary?twitterError=true";
         } catch (Exception e) {
             log.error("Twitter callback failed", e);
             return frontendUrl + "/learning-summary?twitterError=true";
