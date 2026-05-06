@@ -23,6 +23,7 @@ export const LEARNINGSUM_I18N: Record<Lang, {
   twitter_error: string;
   twitter_linked: string;
   twitter_reconnect: string;
+  twitter_quota: string;
   char_count: (n: number) => string;
 }> = {
   ko: {
@@ -51,6 +52,7 @@ export const LEARNINGSUM_I18N: Record<Lang, {
     twitter_error: "X 전송에 실패했습니다. 다시 시도해주세요.",
     twitter_linked: "X 계정이 연동되었습니다.",
     twitter_reconnect: "X 인증이 만료되었습니다. 다시 연동해주세요.",
+    twitter_quota: "X API 월 사용량이 초과되었습니다. 잠시 후 다시 시도해주세요.",
     char_count: (n: number) => `${n}/280자`,
   },
   en: {
@@ -79,6 +81,7 @@ export const LEARNINGSUM_I18N: Record<Lang, {
     twitter_error: "Failed to post to X. Please try again.",
     twitter_linked: "X account connected.",
     twitter_reconnect: "X session expired. Please reconnect.",
+    twitter_quota: "Monthly X API quota exceeded. Please try again later.",
     char_count: (n: number) => `${n}/280 chars`,
   },
   ja: {
@@ -107,6 +110,7 @@ export const LEARNINGSUM_I18N: Record<Lang, {
     twitter_error: "X投稿に失敗しました。もう一度お試しください。",
     twitter_linked: "Xアカウントが連携されました。",
     twitter_reconnect: "X認証が期限切れです。再連携してください。",
+    twitter_quota: "X APIの月間利用上限を超えました。しばらくしてから再試行してください。",
     char_count: (n: number) => `${n}/280文字`,
   },
   zh: {
@@ -135,6 +139,7 @@ export const LEARNINGSUM_I18N: Record<Lang, {
     twitter_error: "发布到X失败，请重试。",
     twitter_linked: "X账户已连接。",
     twitter_reconnect: "X授权已过期，请重新连接。",
+    twitter_quota: "X API 月度配额已用尽，请稍后再试。",
     char_count: (n: number) => `${n}/280字符`,
   },
 };

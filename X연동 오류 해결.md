@@ -268,3 +268,129 @@ org.springframework.web.client.HttpClientErrorException$Forbidden:
 
 - 강화된 로그에 상태코드 + 응답 바디가 함께 찍히므로 어떤 호출이 실패하는지 즉시 식별 가능.
 - 그래도 `/2/users/me` 가 403이라면 X Developer Portal의 "User authentication settings"에서 **App permissions = Read and write** 인지, **Type of App = Web App (Confidential client)** 인지 재확인 (이 파일 원인 2 참조).
+
+### 5차: 트윗 발신 단계 500 — 진단 로그 강화 (적용)
+
+#### 증상
+
+4차 fix(scope에 `tweet.read` 추가) 적용 후 콜백은 통과했고 `?twitterLinked=true` 까지 도달.
+이번엔 그 다음 단계인 트윗 실제 발신 시:
+
+```
+POST https://api.md-blog.org/api/twitter/tweet
+→ 500 Internal Server Error
+```
+
+#### 분석
+
+- `TwitterController.tweet()` 는 `IllegalStateException` 만 catch하고 `RuntimeException` 은 통과시킴 → Spring 기본 핸들러가 500 반환.
+- `doPostTweet` 의 catch 블록은 `e.getMessage()` 의 문자열에 "401" 이 포함됐는지로 토큰 만료를 판정하는 약한 방식.
+  - X API의 401은 종종 메시지에 "401" 문자열이 안 들어가는 경우가 있어 누락 가능.
+  - 그리고 실제 응답 바디(어떤 사유로 거부됐는지)는 로그에 전혀 남기지 않음.
+
+#### 적용한 수정 (진단 강화)
+
+**1. `TwitterService.doPostTweet()` 의 catch 블록을 `HttpStatusCodeException` 분기 우선으로 재작성** — `md-blog-backend/.../TwitterService.java`
+
+```java
+} catch (HttpStatusCodeException e) {
+    log.error("Tweet posting failed: status={}, body={}",
+            e.getStatusCode(), e.getResponseBodyAsString());
+    if (e.getStatusCode().value() == 401) {
+        throw new TwitterAuthExpiredException();
+    }
+    throw new RuntimeException("Tweet posting failed: " + e.getStatusCode()
+            + " " + e.getResponseBodyAsString(), e);
+}
+```
+
+→ 이제 CloudWatch에 X가 반환한 status + JSON body가 그대로 남으므로 280자 초과/중복/권한 부족/레이트 리밋 등을 즉시 분간 가능.
+
+**2. `TwitterController.tweet()` 에 `RuntimeException` catch 추가** — 502 + body의 error 메시지로 응답.
+
+```java
+} catch (RuntimeException e) {
+    return ResponseEntity.status(502).body(Map.of("error", e.getMessage()));
+}
+```
+
+→ 프론트가 상태코드만 봐도 5xx가 백엔드 자체 결함이 아니라 X 게이트웨이 실패임을 알 수 있고, 메시지에 X의 응답 바디가 실려 있어 사용자에게 상세 표시도 가능.
+
+#### 다음 단계 (진단 정보 수집)
+
+배포 후 같은 흐름을 재현하면 CloudWatch (`/ecs/md-blog-td`) 에 다음 형태의 로그가 남음:
+
+```
+ERROR ... TwitterService : Tweet posting failed: status=403 FORBIDDEN, body={"detail":"...","status":403,"title":"..."}
+```
+
+이 status + body 조합으로 의심 분기:
+
+| 상태 | body 단서 | 원인 |
+|---|---|---|
+| 400 | `text` 관련 메시지 | 280자 초과 등 텍스트 검증 실패 |
+| 403 | "duplicate content" 류 | 직전과 동일 텍스트 중복 트윗 |
+| 403 | "Unsupported Authentication" / scope 관련 | 4차 scope 변경 후 사용자가 X에서 새 동의를 안 받음 → 기존 access_token에 `tweet.write` 부재 |
+| 403 | 기타 | App permissions가 Read-only |
+| 429 | rate limit | 무료 티어 트윗 쿼터 초과, 재시도 대기 |
+
+#### 사용자 측 재동의 가능성
+
+4차에서 scope에 `tweet.read` 를 추가했으므로 **이미 연동된 사용자도 한번은 X Developer 동의 화면을 다시 거쳐야** 새 scope가 access_token에 반영됨. `?twitterLinked=true` 까지는 갔지만 토큰 자체가 옛 scope만 가졌을 가능성이 있음. 의심되면 DB의 `users.twitter_access_token` 을 비우거나 (또는 X 계정의 "앱 연결 해제" 후) 재인증.
+
+### 6차: X API 크레딧 소진 (402 Payment Required) — UX 분기 처리 (적용)
+
+#### 증상
+
+5차의 강화된 로깅 덕분에 정확한 원인이 한 번에 보임:
+
+```
+ERROR ... TwitterService : Tweet posting failed: status=402 PAYMENT_REQUIRED, body={
+  "account_id": 2051096097834344448,
+  "title": "CreditsDepleted",
+  "detail": "Your enrolled account [...] does not have any credits to fulfill this request.",
+  "type": "https://api.twitter.com/2/problems/credits"
+}
+```
+
+#### 분석
+
+코드/스코프/권한 모두 정상. 토큰 발급, scope 인가, `/2/tweets` 인증까지 다 통과했고 마지막에 **X 계정의 API 크레딧 소진**으로 막힌 것. X가 도입한 새 크레딧 시스템은 무료 티어가 매우 적은 양만 제공하며, 트윗 작성 호출 시마다 차감.
+
+→ 코드로 해결할 문제가 아님. 해결책: **(a)** 한도 회복 대기, **(b)** 유료 티어로 업그레이드 (Basic $200/월~), **(c)** 다른 X Developer 계정/앱 사용.
+
+다만 사용자 입장에서는 5차 fix까지 적용된 일반 "X 전송 실패" 메시지는 재시도하라는 뉘앙스라 오해를 일으키므로, **이 한 가지 사유만 별도 분기**해 명확히 안내하도록 함.
+
+#### 적용한 수정
+
+##### 백엔드
+
+- `TwitterService.doPostTweet()` — HTTP 402 일 때 `IllegalStateException("TWITTER_QUOTA_EXCEEDED")` 던지기.
+  ```java
+  if (e.getStatusCode().value() == 402) {
+      throw new IllegalStateException("TWITTER_QUOTA_EXCEEDED");
+  }
+  ```
+- `TwitterController.tweet()` — 그 예외를 인지해 **HTTP 402 + `{"error":"TWITTER_QUOTA_EXCEEDED"}`** 반환. 기존 `TWITTER_RECONNECT_REQUIRED` 와 같은 패턴.
+
+##### 프론트
+
+- `i18n/learningsum.ts` 에 `twitter_quota` 키 추가 (ko/en/ja/zh 4개 언어 모두):
+  - ko: "X API 월 사용량이 초과되었습니다. 잠시 후 다시 시도해주세요."
+  - en/ja/zh: 동일 의미로 번역
+- `LearningSum.tsx`:
+  - `tweetStatus` union 에 `"quota"` 추가.
+  - `handlePostToX` catch에서 `msg === "TWITTER_QUOTA_EXCEEDED"` 분기 → `setTweetStatus("quota")`.
+  - 결과 카드 푸터에 `tweetStatus === "quota"` 일 때 `t.twitter_quota` 표시 (기존 `twitter_error` 와 같은 빨간 메시지 스타일).
+
+#### 검증
+
+1. 백엔드/프론트 재배포 후 같은 흐름 (요약 → "X로 전송") 재시도.
+2. 크레딧 소진 상태가 그대로면 결과 카드에 일반 "X 전송 실패" 가 아니라 **"X API 월 사용량이 초과되었습니다…"** 가 떠야 정상.
+3. Network 탭에서 `/api/twitter/tweet` 응답이 **402** 이고 body가 `{"error":"TWITTER_QUOTA_EXCEEDED"}` 인지 확인.
+
+#### 운영 측 후속 조치
+
+- **단기**: 무료 티어 한도가 회복될 때까지 사용자에게 친절한 메시지로 안내 (현 fix).
+- **중기**: Basic 티어 ($200/월) 업그레이드 검토 — 트윗 발신이 핵심 가치 제공 기능이라면.
+- **선택지**: "X로 전송" 버튼을 한도 회복 전까지 운영에서 임시 비활성화하는 feature flag.

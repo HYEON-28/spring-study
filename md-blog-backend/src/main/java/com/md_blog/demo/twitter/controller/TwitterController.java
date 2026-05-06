@@ -71,7 +71,12 @@ public class TwitterController {
             if ("TWITTER_RECONNECT_REQUIRED".equals(e.getMessage())) {
                 return ResponseEntity.status(401).body(Map.of("error", "TWITTER_RECONNECT_REQUIRED"));
             }
+            if ("TWITTER_QUOTA_EXCEEDED".equals(e.getMessage())) {
+                return ResponseEntity.status(402).body(Map.of("error", "TWITTER_QUOTA_EXCEEDED"));
+            }
             return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(502).body(Map.of("error", e.getMessage()));
         }
     }
 }

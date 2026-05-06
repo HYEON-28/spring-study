@@ -31,7 +31,7 @@ function LearningSum() {
   const [error, setError] = useState<string | null>(null);
 
   const [posting, setPosting] = useState(false);
-  const [tweetStatus, setTweetStatus] = useState<"success" | "error" | "linked" | "reconnect" | null>(null);
+  const [tweetStatus, setTweetStatus] = useState<"success" | "error" | "linked" | "reconnect" | "quota" | null>(null);
 
   const prevDefaultPromptRef = useRef(t.default_prompt);
 
@@ -123,6 +123,8 @@ function LearningSum() {
       if (msg === "TWITTER_RECONNECT_REQUIRED") {
         await refreshUser();
         setTweetStatus("reconnect");
+      } else if (msg === "TWITTER_QUOTA_EXCEEDED") {
+        setTweetStatus("quota");
       } else {
         setTweetStatus("error");
       }
@@ -252,6 +254,9 @@ function LearningSum() {
             )}
             {tweetStatus === "reconnect" && (
               <span className={styles.tweetError}>{t.twitter_reconnect}</span>
+            )}
+            {tweetStatus === "quota" && (
+              <span className={styles.tweetError}>{t.twitter_quota}</span>
             )}
             <button
               className={styles.xBtn}

@@ -194,12 +194,21 @@ public class TwitterService {
                     .body(Map.of("text", text))
                     .retrieve()
                     .toBodilessEntity();
-        } catch (Exception e) {
-            String msg = e.getMessage() != null ? e.getMessage() : "";
-            if (msg.contains("401") || msg.contains("Unauthorized")) {
+        } catch (org.springframework.web.client.HttpStatusCodeException e) {
+            log.error("Tweet posting failed: status={}, body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            if (e.getStatusCode().value() == 401) {
                 throw new TwitterAuthExpiredException();
             }
-            throw new RuntimeException("Tweet posting failed: " + msg, e);
+            if (e.getStatusCode().value() == 402) {
+                throw new IllegalStateException("TWITTER_QUOTA_EXCEEDED");
+            }
+            throw new RuntimeException("Tweet posting failed: " + e.getStatusCode()
+                    + " " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("Tweet posting failed (non-HTTP)", e);
+            throw new RuntimeException("Tweet posting failed: "
+                    + (e.getMessage() != null ? e.getMessage() : ""), e);
         }
     }
 
