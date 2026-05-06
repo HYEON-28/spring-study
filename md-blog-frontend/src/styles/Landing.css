@@ -513,3 +513,54 @@
     font-size: 11px;
   }
 }
+
+/* INSTALL MODAL */
+.install-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeDown 0.2s ease;
+}
+.install-modal {
+  background: var(--gh-surface);
+  border: 1px solid var(--gh-border);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 360px;
+  width: 100%;
+  color: var(--gh-text);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.install-modal h3 {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.install-modal-step {
+  font-size: 14px;
+  color: var(--gh-muted);
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+.install-modal-close {
+  margin-top: 16px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--gh-border);
+  background: var(--gh-surface2);
+  color: var(--gh-text);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.install-modal-close:hover {
+  background: var(--gh-border);
+}

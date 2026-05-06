@@ -4,6 +4,7 @@ import { LANDING_I18N } from "../i18n/landing";
 import { useLang } from "../context/LangContext";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
+import InstallButton from "../components/InstallButton";
 import { Link } from "react-router-dom";
 
 function Landing() {
@@ -92,6 +93,7 @@ function Landing() {
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </a>
+          <InstallButton />
         </div>
       </section>
 
